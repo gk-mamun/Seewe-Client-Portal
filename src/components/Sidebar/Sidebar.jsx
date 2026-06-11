@@ -10,21 +10,27 @@ import './Sidebar.css';
 
 export default function Sidebar() {
   const { open, close } = useSidebar();
-  const { logout } = useAuth();
+  const { logout, isCompanyComplete } = useAuth();
   const navigate = useNavigate();
 
   const [badges, setBadges] = useState({ 'pending-leave': 0, 'pending-claim': 0 });
 
   useEffect(() => {
+    if (!isCompanyComplete) return;        // skip badge fetches while locked
     Promise.all([leaveService.pendingCount(), claimsService.pendingCount()]).then(
       ([leave, claim]) => setBadges({ 'pending-leave': leave, 'pending-claim': claim })
     );
-  }, []);
+  }, [isCompanyComplete]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate(ROUTES.LOGIN);
   };
+
+  // When the profile is incomplete, only the Company link is reachable.
+  const items = isCompanyComplete
+    ? SIDEBAR_ITEMS
+    : SIDEBAR_ITEMS.filter((it) => it.to === ROUTES.COMPANY);
 
   return (
     <nav className={`sidebar ${open ? 'open' : ''}`} aria-label="Primary">
@@ -33,7 +39,7 @@ export default function Sidebar() {
       </div>
       <div className="sb-section">Main Menu</div>
 
-      {SIDEBAR_ITEMS.map((item) => (
+      {items.map((item) => (
         <NavLink
           key={item.key}
           to={item.to}
@@ -49,8 +55,17 @@ export default function Sidebar() {
       ))}
 
       <div className="sb-wizard">
-        <div className="sb-wizard-title">✓ Setup Complete</div>
-        <div className="sb-wizard-sub">Company profile configured</div>
+        {isCompanyComplete ? (
+          <>
+            <div className="sb-wizard-title">✓ Setup Complete</div>
+            <div className="sb-wizard-sub">Company profile configured</div>
+          </>
+        ) : (
+          <>
+            <div className="sb-wizard-title">⚠ Complete Your Profile</div>
+            <div className="sb-wizard-sub">Fill required fields to unlock the portal</div>
+          </>
+        )}
       </div>
 
       <div className="sb-footer">

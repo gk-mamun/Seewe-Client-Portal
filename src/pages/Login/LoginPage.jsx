@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ROUTES } from '../../utils/constants.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
@@ -8,69 +8,74 @@ import './LoginPage.css';
 export default function LoginPage() {
   useDocumentTitle('Sign In');
   const navigate = useNavigate();
-  const { login, demoLogin } = useAuth();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState('demo@brightentechnology.com');
-  const [password, setPassword] = useState('demo1234');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError]       = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, password);
-    navigate(ROUTES.DASHBOARD);
-  };
+    if (submitting) return;
 
-  const handleDemo = async () => {
-    await demoLogin();
-    navigate(ROUTES.DASHBOARD);
+    setError('');
+    setSubmitting(true);
+
+    try {
+      const client = await login({ username: username.trim(), password });
+      const requiredOk = ['company_name', 'company_address', 'country', 'email']
+        .every((f) => String(client?.[f] ?? '').trim() !== '');
+
+      // If profile is incomplete, jump straight to the Company page
+      // (the route guard will also enforce this).
+      const dest = !requiredOk
+        ? ROUTES.COMPANY
+        : (location.state?.from?.pathname || ROUTES.DASHBOARD);
+
+      navigate(dest, { replace: true });
+    } catch (err) {
+      setError(err?.message || 'Sign-in failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form className="lg-box" onSubmit={handleSubmit}>
+    <form className="lg-box" onSubmit={handleSubmit} noValidate>
       <div className="lg-logo">SeeWe<span>Work</span></div>
       <div className="lg-sub">Workforce Management System</div>
 
-      <label htmlFor="lg-user">Username / Email</label>
+      <label htmlFor="lg-user">Username</label>
       <input
         id="lg-user"
         type="text"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@example.com"
+        autoComplete="username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Your username"
+        disabled={submitting}
+        required
       />
 
       <label htmlFor="lg-pw">Password</label>
       <input
         id="lg-pw"
         type="password"
+        autoComplete="current-password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="••••••••"
+        disabled={submitting}
+        required
       />
 
-      <button type="submit" className="lg-btn">Sign In</button>
+      {error && <div className="lg-error" role="alert">{error}</div>}
 
-      <div className="lg-divider">
-        <hr />
-        <span>or try demo</span>
-        <hr />
-      </div>
-
-      <div className="lg-demo">
-        <div className="lg-demo-hd">🎁 Demo Credentials</div>
-        <div className="lg-demo-grid">
-          <div>
-            <div className="lg-demo-lbl">Username</div>
-            <code>demo@brightentechnology.com</code>
-          </div>
-          <div>
-            <div className="lg-demo-lbl">Password</div>
-            <code>demo1234</code>
-          </div>
-        </div>
-        <button type="button" className="lg-btn lg-btn-demo" onClick={handleDemo}>
-          ▶ Launch Demo Portal
-        </button>
-      </div>
+      <button type="submit" className="lg-btn" disabled={submitting}>
+        {submitting ? 'Signing in…' : 'Sign In'}
+      </button>
 
       <div className="lg-link">
         First time? <Link to={ROUTES.PW_SETUP}>Activate your account</Link>

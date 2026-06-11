@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import UploadBox from '../../../components/UploadBox/UploadBox.jsx';
+import { useAuth } from '../../../context/AuthContext.jsx';
 
 const INDUSTRIES = [
   'Technology / IT', 'Software & SaaS', 'Finance & Banking', 'Insurance',
@@ -15,26 +16,48 @@ const INDUSTRIES = [
 const CONTACT_PREFS = ['WhatsApp', 'Email', 'Both'];
 
 export default function CompanyInfoTab() {
-  const [company, setCompany] = useState({
-    name: 'Brighten Technology Ltd.',
-    brn: '1234567-D',
-    industry: 'Technology / IT',
-    yearEstablished: '',
-    employees: '',
-    website: '',
-    address: 'Suite 12, Menara KLCC, Kuala Lumpur',
-    country: 'Malaysia',
-    intro: '',
-  });
-  const [contact, setContact] = useState({
-    name: 'Chan Siu Ming',
-    title: 'HR Manager',
-    officeNum: '+852 3XXX XXXX',
-    mobile: '+852 9XXX XXXX',
-    email: 'csm@brightentechnology.com',
-    pref: 'Both',
-    location: 'Malaysia',
-  });
+  const { client, updateClient } = useAuth();
+
+  // Prefill from the logged-in client; falls back to blanks so the inputs
+  // are always controlled.
+  const [company, setCompany] = useState(() => ({
+    name:            client?.company_name    || '',
+    brn:             client?.brn             || '',
+    industry:        client?.industry        || 'Technology / IT',
+    yearEstablished: client?.year_established || '',
+    employees:       client?.employees       || '',
+    website:         client?.website         || '',
+    address:         client?.company_address || '',
+    country:         client?.country         || '',
+    intro:           client?.intro           || '',
+  }));
+  const [contact, setContact] = useState(() => ({
+    name:      client?.contact_name  || '',
+    title:     client?.contact_title || '',
+    officeNum: client?.office_number || '',
+    mobile:    client?.mobile        || '',
+    email:     client?.email         || '',
+    pref:      client?.contact_pref  || 'Both',
+    location:  client?.contact_location || client?.country || '',
+  }));
+
+  // Reflect changes back into the cached client object so the route
+  // guard re-evaluates whenever the required fields are filled in.
+  useEffect(() => {
+    if (!client) return;
+    const patch = {
+      company_name:    company.name,
+      company_address: company.address,
+      country:         company.country,
+      email:           contact.email,
+    };
+    const changed = Object.entries(patch).some(
+      ([k, v]) => String(client[k] ?? '').trim() !== String(v ?? '').trim()
+    );
+    if (changed) updateClient(patch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company.name, company.address, company.country, contact.email]);
+
   const [brFile, setBrFile] = useState({ name: 'BR_Certificate_BrightenTech_2026.pdf', verified: true });
 
   const setC = (patch) => setCompany((c) => ({ ...c, ...patch }));
