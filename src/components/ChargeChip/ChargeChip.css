@@ -1,0 +1,15 @@
+.charge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid;
+  padding: 3px 7px;
+  border-radius: 5px;
+  margin: 2px 2px 2px 0;
+  white-space: nowrap;
+}
+.charge-chip--toggle {
+  cursor: pointer;
+}

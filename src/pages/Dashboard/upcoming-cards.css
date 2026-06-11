@@ -1,0 +1,77 @@
+/* Shared row styles for Upcoming Holidays / Upcoming Leave / Staff Events. */
+.up-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--c-border-soft);
+}
+.up-row:last-child { border-bottom: none; }
+
+.up-flex { flex: 1; min-width: 0; }
+
+.up-date {
+  background: #f4f4f4;
+  border-radius: var(--r-md);
+  padding: 4px 8px;
+  text-align: center;
+  min-width: 36px;
+  flex-shrink: 0;
+}
+.up-dm { font-size: 16px; font-weight: 900; color: var(--c-text); line-height: 1.1; }
+.up-mo {
+  font-size: 9px;
+  color: var(--c-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.up-name { font-size: 12px; font-weight: 600; color: var(--c-text); }
+.up-meta { font-size: 11px; color: var(--c-text-soft); }
+.up-meta--onboard { color: #0891b2; font-weight: 600; }
+.up-meta--amber   { color: var(--c-warning); font-weight: 600; }
+.up-meta--danger  { color: var(--c-danger); font-weight: 600; }
+
+.up-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+.up-days {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-success);
+  background: var(--c-success-bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--c-success-border);
+  flex-shrink: 0;
+}
+
+/* Staff-events section headers */
+.se-section {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 5px 16px 3px;
+  border-bottom: 1px solid var(--c-border-soft);
+}
+.se-section--onboard { background: #ecfeff;          color: #0891b2; }
+.se-section--amber   { background: var(--c-warning-bg); color: var(--c-warning); }
+.se-section--danger  { background: #fff1f2;           color: var(--c-danger); }
+
+.se-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+.se-pill--onboard { background: #ecfeff; color: #0891b2; border-color: #a5f3fc; }
+.se-pill--amber   { background: var(--c-warning-bg); color: var(--c-warning); border-color: #fed7aa; }
+.se-pill--danger  { background: #fff1f2; color: var(--c-danger); border-color: var(--c-danger-border); }

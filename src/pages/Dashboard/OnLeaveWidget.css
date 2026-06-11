@@ -1,0 +1,22 @@
+.onleave-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px 20px;
+}
+.onleave-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--c-surface-alt);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-border);
+}
+.onleave-info .on-name  { font-size: 12px; font-weight: 700; color: var(--c-text); }
+.onleave-info .on-type  { font-size: 11px; color: var(--c-text-soft); }
+.onleave-info .on-dates { font-size: 10px; color: var(--c-text-fade); margin-top: 1px; }
+
+@media (max-width: 768px) {
+  .onleave-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+}

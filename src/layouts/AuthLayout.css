@@ -1,0 +1,15 @@
+.auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--brand-primary-dark);
+  padding: 24px;
+}
+
+@media (max-width: 520px) {
+  .auth-wrap {
+    align-items: flex-start;
+    padding: 48px 16px 20px;
+  }
+}

@@ -1,0 +1,34 @@
+.ob-wrap {
+  min-height: 100vh;
+  background: var(--brand-bg);
+  padding: 40px 20px;
+}
+.ob-card {
+  max-width: 740px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+.ob-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.ob-logo { font-size: 18px; font-weight: 800; }
+.ob-logo span { color: var(--brand-accent); }
+.ob-step-lbl { font-size: 13px; color: var(--c-text-soft); }
+
+.ob-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--c-border-soft);
+}
+
+@media (max-width: 768px) {
+  .ob-card { padding: 24px; }
+}

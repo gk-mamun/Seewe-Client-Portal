@@ -1,0 +1,22 @@
+.card {
+  background: var(--c-surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--c-border);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.card-hd {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--c-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-hd h3 { font-size: 14px; font-weight: 700; }
+
+.card-body { padding: 16px 20px; }
+
+@media (max-width: 768px) {
+  .card { margin-bottom: 12px; }
+  .card-hd { flex-wrap: wrap; gap: 6px; }
+}

@@ -1,0 +1,102 @@
+/* Page-level chrome shared across multiple screens. */
+
+.page-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-hd h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--c-text-muted);
+}
+
+/* Section headings used across the profile + settings views */
+.section-hd {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  margin: 20px 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid var(--brand-primary);
+}
+
+/* Generic info grid used across profile + settings */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.info-item .lbl {
+  font-size: 11px;
+  color: var(--c-text-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+}
+.info-item .val {
+  font-size: 13px;
+  color: var(--c-text);
+  font-weight: 500;
+}
+
+/* Form primitives */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-row.tri  { grid-template-columns: 1fr 1fr 1fr; }
+.form-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  display: block;
+  margin-bottom: 5px;
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--brand-primary);
+}
+.form-field textarea { resize: vertical; min-height: 80px; }
+.form-body { padding: 18px 24px; }
+.save-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-border-soft);
+}
+.form-section-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin: 16px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

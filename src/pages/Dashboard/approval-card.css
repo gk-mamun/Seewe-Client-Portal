@@ -1,0 +1,56 @@
+/* Shared styles for Leave/Claim approval cards on the dashboard. */
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  margin-left: 8px;
+  line-height: 1;
+}
+
+.appr-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--c-border-soft);
+}
+.appr-row:last-child { border-bottom: none; }
+
+.appr-info { flex: 1; min-width: 0; }
+.appr-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin-bottom: 3px;
+}
+.appr-meta { font-size: 12px; color: var(--c-text-muted); }
+.appr-quote {
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.appr-empty {
+  text-align: center;
+  padding: 28px;
+  color: var(--c-text-fade);
+  font-size: 13px;
+}
+.appr-more {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--c-info);
+  border-top: 1px solid var(--c-border-soft);
+  text-decoration: underline;
+}

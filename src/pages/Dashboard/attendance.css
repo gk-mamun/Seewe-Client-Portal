@@ -1,0 +1,11 @@
+.att-emp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.att-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--c-text);
+}
+.att-dash { color: var(--c-text-fade); }

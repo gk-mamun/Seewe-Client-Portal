@@ -1,0 +1,28 @@
+.sig-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.sig-overlay.open { display: flex; }
+
+.sig-box {
+  background: var(--c-surface);
+  border-radius: 14px;
+  width: 420px;
+  max-width: 95vw;
+  padding: 28px 28px 22px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+}
+.sig-box h3 { margin: 0 0 4px; font-size: 16px; color: var(--c-text); }
+.sig-sub { font-size: 12px; color: var(--c-text-soft); margin-bottom: 18px; }
+
+.sig-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}

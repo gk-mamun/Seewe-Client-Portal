@@ -1,0 +1,25 @@
+.emp-mob-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.emp-mob-info { flex: 1; min-width: 0; }
+.emp-mob-name { font-size: 14px; font-weight: 700; color: var(--c-text); margin-bottom: 2px; }
+.emp-mob-pos  { font-size: 12px; color: var(--c-text-muted); margin-bottom: 5px; }
+.emp-mob-dept {
+  font-size: 11px;
+  color: var(--c-text-soft);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,58 @@
+/* Stateless utility classes (alerts, badges, buttons) used across the whole portal. */
+
+/* ── Alerts ───────────────────────────────── */
+.alert {
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.alert-red { background: var(--c-danger-bg);  border: 1px solid var(--c-danger-border);  color: var(--c-danger-dark); }
+.alert-amb { background: var(--c-warning-bg); border: 1px solid var(--c-warning-border); color: var(--c-warning); }
+.alert-grn { background: var(--c-success-bg); border: 1px solid var(--c-success-border); color: var(--c-success); }
+.alert-blu { background: var(--c-info-bg);    border: 1px solid var(--c-info-border);    color: var(--c-info); }
+.alert-ico  { font-size: 18px; flex-shrink: 0; }
+.alert-body { flex: 1; }
+.alert-body strong { display: block; font-weight: 700; margin-bottom: 2px; }
+
+/* ── Badges ───────────────────────────────── */
+.ba {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ba.grn { background: #dcfce7; color: var(--c-success); }
+.ba.red { background: #fee2e2; color: var(--c-danger-dark); }
+.ba.amb { background: #fef3c7; color: var(--c-warning); }
+.ba.blu { background: var(--c-info-soft-bg); color: var(--c-info); }
+.ba.gry { background: #f3f4f6; color: #374151; }
+.ba.blk { background: #111; color: #fff; }
+.ba.pur { background: #f3e8ff; color: #7e22ce; }
+.ba.neu { background: #f0f9ff; color: #0369a1; }
+
+/* ── Buttons ──────────────────────────────── */
+.btn {
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bdk  { background: var(--brand-primary); color: #fff; }
+.bdk:hover  { background: var(--brand-primary-dark); }
+.bol  { background: #fff; color: var(--brand-primary); border: 1.5px solid var(--c-info-border); }
+.bol:hover  { background: var(--c-info-bg); }
+.bred { background: #fee2e2; color: var(--c-danger-dark); border: 1.5px solid var(--c-danger-border); }
+.bred:hover { background: var(--c-danger-border); color: #7f1d1d; }
+.bgrn { background: #dcfce7; color: var(--c-success); border: 1.5px solid var(--c-success-border); }
+.bgrn:hover { background: var(--c-success-border); color: #14532d; }

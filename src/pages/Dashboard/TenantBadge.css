@@ -1,0 +1,10 @@
+.tenant-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tenant-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-primary-dark);
+}

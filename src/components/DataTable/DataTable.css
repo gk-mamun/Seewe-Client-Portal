@@ -1,0 +1,76 @@
+.tw { overflow-x: auto; }
+
+.tb {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tb th {
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  background: var(--c-info-soft-bg);
+  white-space: nowrap;
+}
+.tb td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--c-border-soft);
+  color: #333;
+}
+.tb tr:last-child td { border-bottom: none; }
+.tb tr:hover td { background: var(--c-surface-mute); }
+
+/* Mobile: collapse each row into a card */
+@media (max-width: 768px) {
+  .tw { overflow-x: unset !important; }
+  .tb { display: block !important; }
+  .tb thead { display: none !important; }
+  .tb tbody { display: block !important; }
+  .tb tr {
+    display: block !important;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+  .tb tr:hover td { background: unset !important; }
+  .tb td {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 14px !important;
+    border-bottom: 1px solid #f5f5f5 !important;
+    font-size: 13px !important;
+    min-height: 34px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .tb td:last-child { border-bottom: none !important; }
+  .tb td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--c-text-fade);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 3px;
+    min-width: 80px;
+  }
+
+  /* Landscape mode keeps a real horizontally-scrolling table */
+  .tw.landscape { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .tb.landscape { display: table !important; font-size: 11px !important; }
+  .tb.landscape thead { display: table-header-group !important; }
+  .tb.landscape tbody { display: table-row-group !important; }
+  .tb.landscape tr { display: table-row !important; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; margin-bottom: 0 !important; }
+  .tb.landscape th, .tb.landscape td { display: table-cell !important; padding: 7px 8px !important; white-space: nowrap; }
+  .tb.landscape td { font-size: 11px !important; border-bottom: 1px solid var(--c-border-soft) !important; }
+  .tb.landscape td::before { display: none !important; }
+}

@@ -1,0 +1,27 @@
+.salary-breakdown {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sal-item {
+  background: var(--c-surface-alt);
+  border-radius: var(--r-md);
+  padding: 11px 12px;
+  border: 1px solid var(--c-border);
+}
+.sal-item .s-lbl {
+  font-size: 10px;
+  color: var(--c-text-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.sal-item .s-val { font-size: 15px; font-weight: 800; color: var(--c-text); }
+.sal-item.total { background: var(--brand-primary); border-color: var(--brand-primary); }
+.sal-item.total .s-lbl { color: rgba(255, 255, 255, 0.6); }
+.sal-item.total .s-val { color: #fff; }
+
+@media (max-width: 768px) {
+  .salary-breakdown { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+}

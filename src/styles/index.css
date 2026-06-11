@@ -1,0 +1,6 @@
+/* Order matters: variables → reset → global → utilities → responsive */
+@import './variables.css';
+@import './reset.css';
+@import './global.css';
+@import './utilities.css';
+@import './responsive.css';

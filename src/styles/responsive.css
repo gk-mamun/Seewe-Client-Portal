@@ -1,0 +1,31 @@
+/* Cross-cutting responsive rules. Component-level CSS handles its own
+   responsive tweaks; this file only covers shared layout breakpoints. */
+
+@media (max-width: 1280px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-row  { grid-template-columns: 1fr 1fr; }
+  .info-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .page-hd { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .page-hd h1 { font-size: 18px; }
+  .page-hd .user-info { width: 100%; }
+  .alert { flex-wrap: wrap; }
+
+  .stat-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .form-row,
+  .form-row.tri,
+  .form-row.full { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .info-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .page-hd h1 { font-size: 16px; }
+  .stat-grid  { grid-template-columns: 1fr 1fr !important; }
+  .info-grid  { grid-template-columns: 1fr !important; }
+}

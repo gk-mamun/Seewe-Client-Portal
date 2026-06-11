@@ -1,0 +1,15 @@
+.emp-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.emp-desk-table { display: block; }
+.emp-mob-list   { display: none; padding: 14px; }
+
+@media (max-width: 768px) {
+  .emp-desk-table { display: none; }
+  .emp-mob-list   { display: block; }
+}

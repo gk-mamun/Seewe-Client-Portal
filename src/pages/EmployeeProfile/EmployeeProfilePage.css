@@ -1,0 +1,7 @@
+.prof-card-tabs { background: var(--c-surface); padding: 0; }
+
+.prof-body { padding: 22px 28px; }
+
+@media (max-width: 768px) {
+  .prof-body { padding: 14px 12px; }
+}

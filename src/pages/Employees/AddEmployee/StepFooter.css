@@ -1,0 +1,21 @@
+.ae-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid var(--c-border-soft);
+  margin-top: 8px;
+}
+.ae-footer-left {
+  display: flex;
+  gap: 8px;
+}
+
+.ae-save-draft {
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+  border: 1.5px solid #fed7aa;
+}
+.ae-save-draft:hover {
+  background: #fef3c7;
+}

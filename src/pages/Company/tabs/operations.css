@@ -1,0 +1,154 @@
+/* ── Daily Operation Hours table ── */
+.ops-table-wrap {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.ops-table-hd {
+  background: var(--brand-primary-dark);
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  padding: 9px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+}
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ops-table tr { border-top: 1px solid var(--c-border-soft); }
+.ops-table tr:nth-child(even) { background: #f9f9fb; }
+.ops-table tr.is-off td:not(:first-child) { opacity: 0.4; pointer-events: none; }
+.ops-table td { padding: 8px 10px; }
+.ops-table td:first-child { padding: 9px 14px; width: 130px; }
+
+.ops-day-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-primary-dark);
+}
+.ops-table tr.is-off .ops-day-cell { font-weight: 400; color: #bbb; }
+.ops-day-cell input { width: 14px; height: 14px; accent-color: var(--brand-primary-dark); }
+
+.ops-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ops-time-row input[type='time'] {
+  padding: 6px 9px;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  width: 118px;
+  outline: none;
+  font-family: inherit;
+}
+.ops-time-row span { color: var(--c-text-soft); font-size: 12px; }
+
+/* ── Remote team cards ── */
+.remote-teams-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.remote-team-card {
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: 9px;
+  padding: 14px 16px;
+}
+.remote-team-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.remote-team-card header button {
+  background: none; border: none; color: #ccc;
+  font-size: 15px; cursor: pointer;
+}
+.rt-country { font-size: 13px; font-weight: 700; color: var(--brand-primary-dark); }
+.rt-tz { font-size: 11px; color: var(--c-text-soft); }
+
+.rt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.rt-row:last-child { margin-bottom: 0; }
+.rt-row-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--c-text-soft);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.rt-row input[type='time'] {
+  padding: 5px 8px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 12px;
+  outline: none;
+  width: 96px;
+  font-family: inherit;
+}
+.rt-day-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rt-day-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+}
+.rt-day-chip input { accent-color: var(--brand-primary-dark); width: 13px; height: 13px; }
+
+.rt-add-box {
+  background: #fff;
+  border: 1px dashed #d0d0d0;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+/* ── Work mode pills ── */
+.work-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.work-mode-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
+}
+.work-mode-pill input { width: 15px; height: 15px; accent-color: var(--brand-primary-dark); }
+
+@media (max-width: 1024px) {
+  .remote-teams-grid { grid-template-columns: 1fr; }
+  .work-mode-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .work-mode-grid { grid-template-columns: 1fr; }
+  .ops-time-row input[type='time'] { width: auto; flex: 1; }
+}

@@ -1,0 +1,61 @@
+.bill-panel {
+  background: var(--c-surface-alt);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+}
+.bill-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--c-border-soft);
+}
+.bill-row:last-child { border-bottom: none; }
+.bill-row-lbl { font-size: 12px; color: var(--c-text-soft); font-weight: 600; }
+.bill-row-val { font-size: 13px; font-weight: 700; color: var(--c-text); }
+
+.bill-notice {
+  background: var(--c-warning-bg);
+  border: 1px solid var(--c-warning-border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.bill-notice h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-warning);
+  margin-bottom: 10px;
+}
+.bill-notice ul {
+  font-size: 12px;
+  color: var(--c-warning);
+  line-height: 1.9;
+  list-style: disc inside;
+  padding: 0;
+}
+
+.bill-contract-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.bill-file-btn { cursor: pointer; }
+.bill-file-name {
+  font-size: 12px;
+  color: var(--c-text-muted);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--c-info-bg);
+  border-radius: var(--r-sm);
+}

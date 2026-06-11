@@ -1,0 +1,110 @@
+.lg-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 48px 40px;
+  width: 420px;
+  max-width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+}
+.lg-logo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.lg-logo span { color: var(--brand-accent); }
+.lg-sub {
+  font-size: 13px;
+  color: var(--c-text-soft);
+  margin-bottom: 32px;
+  letter-spacing: 0.2px;
+}
+.lg-box label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+.lg-box input[type='text'],
+.lg-box input[type='password'] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  outline: none;
+}
+.lg-box input:focus { border-color: var(--brand-primary); }
+
+.lg-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--brand-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+}
+.lg-btn:hover { background: var(--brand-primary-dark); }
+.lg-btn-demo { background: var(--brand-accent); margin-top: 0; padding: 9px; font-size: 13px; }
+.lg-btn-demo:hover { background: #b88a13; }
+
+.lg-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+.lg-divider hr { flex: 1; border: none; height: 1px; background: var(--c-border); }
+.lg-divider span { font-size: 11px; color: var(--c-text-fade); white-space: nowrap; }
+
+.lg-demo {
+  background: var(--c-surface-alt);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.lg-demo-hd {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--c-text-fade);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.lg-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.lg-demo-lbl { font-size: 10px; color: var(--c-text-soft); margin-bottom: 2px; }
+.lg-demo code {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--c-border);
+}
+
+.lg-link {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--c-text-soft);
+}
+.lg-link a { color: var(--brand-accent); font-weight: 600; cursor: pointer; }
+
+@media (max-width: 520px) {
+  .lg-box { padding: 28px 20px; border-radius: 10px; }
+  .lg-logo { font-size: 18px; }
+  .lg-sub { font-size: 12px; margin-bottom: 24px; }
+}

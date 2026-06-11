@@ -1,0 +1,65 @@
+/* Read-only mode: dim form controls so the page doubles as a view screen. */
+.sett-view input,
+.sett-view select,
+.sett-view textarea {
+  pointer-events: none !important;
+  background: var(--c-surface-alt) !important;
+  border-color: var(--c-border-soft) !important;
+  color: #333 !important;
+  cursor: default !important;
+}
+.sett-view input[type='checkbox'],
+.sett-view input[type='time'],
+.sett-view input[type='date'] {
+  pointer-events: none !important;
+  opacity: 0.7 !important;
+}
+.sett-view label { pointer-events: none !important; cursor: default !important; }
+.sett-view .btn  { pointer-events: none !important; opacity: 0.25 !important; }
+
+/* Section panel — reused across all 5 tabs */
+.sett-panel {
+  background: var(--c-surface-alt);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.sett-panel.accent {
+  border-color: rgba(31, 72, 141, 0.25);
+}
+.sett-panel .section-hd { margin-top: 0; }
+
+/* Small re-usable label/input styles for compact form sections */
+.tiny-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text-soft);
+  display: block;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.tiny-input,
+.tiny-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.tiny-input:focus,
+.tiny-select:focus { border-color: var(--brand-primary); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.field-block { margin-bottom: 10px; }
+
+@media (max-width: 768px) {
+  .grid-2,
+  .grid-3 { grid-template-columns: 1fr !important; }
+}
