@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../utils/constants.js';
+import { authService } from '../../services/authService.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import './PasswordSetupPage.css';
 
 const STEPS = [
   { n: 1, title: 'Enter Username',  sub: 'Your registered email' },
   { n: 2, title: 'Set Password',    sub: 'Create secure credentials' },
-  { n: 3, title: 'Company Profile', sub: 'Verify company information' },
+  { n: 3, title: 'Activate',        sub: 'Sign in to continue' },
 ];
 
 function strengthOf(pw) {
@@ -23,27 +24,56 @@ export default function PasswordSetupPage() {
   useDocumentTitle('Activate Account');
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const [err, setErr] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const strength = useMemo(() => strengthOf(pw), [pw]);
 
   const handleStep1 = (e) => {
     e.preventDefault();
-    if (!email.includes('@')) return setErr('Please enter a valid email.');
+    // Backend accepts username OR email, so only require a non-empty value.
+    if (!identifier.trim()) return setErr('Please enter your username or email.');
     setErr('');
     setStep(2);
   };
 
-  const handleStep2 = (e) => {
+  const handleStep2 = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     if (pw.length < 8) return setErr('Password must be at least 8 characters.');
     if (pw !== pw2)    return setErr('Passwords do not match.');
+
     setErr('');
-    setStep(3);
-    setTimeout(() => navigate(ROUTES.ONBOARDING), 1200);
+    setSubmitting(true);
+    try {
+      await authService.activate({
+        identifier: identifier.trim(),
+        password: pw,
+        passwordConfirmation: pw2,
+      });
+      // No token is issued on activation — send the user to sign in.
+      setStep(3);
+      setTimeout(() => navigate(ROUTES.LOGIN), 1500);
+    } catch (error) {
+      // "No matching account" (404) belongs to the identifier step.
+      if (error?.status === 404) {
+        setStep(1);
+        setErr(error.message || 'No matching account found.');
+      } else if (error?.status === 409) {
+        // Already activated — send them to sign in with the message.
+        navigate(ROUTES.LOGIN, {
+          replace: true,
+          state: { notice: error.message || 'Your account is already activated. You can log in.' },
+        });
+      } else {
+        setErr(error?.message || 'Activation failed. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,10 +118,11 @@ export default function PasswordSetupPage() {
               <label htmlFor="pw-user">Username / Email Address</label>
               <input
                 id="pw-user"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. hr@yourcompany.com"
+                type="text"
+                autoComplete="username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="Username or e.g. hr@yourcompany.com"
               />
             </div>
             {err && <div className="pw-err">{err}</div>}
@@ -138,8 +169,10 @@ export default function PasswordSetupPage() {
             </div>
             {err && <div className="pw-err">{err}</div>}
             <div className="pw-actions">
-              <button type="button" className="lg-btn lg-btn-back" onClick={() => setStep(1)}>← Back</button>
-              <button type="submit" className="lg-btn">Activate Account →</button>
+              <button type="button" className="lg-btn lg-btn-back" onClick={() => setStep(1)} disabled={submitting}>← Back</button>
+              <button type="submit" className="lg-btn" disabled={submitting}>
+                {submitting ? 'Activating…' : 'Activate Account →'}
+              </button>
             </div>
           </form>
         )}
@@ -148,7 +181,7 @@ export default function PasswordSetupPage() {
           <div className="pw-success">
             <div className="pw-success-ico">✅</div>
             <h2>Account Activated!</h2>
-            <p>Your credentials are set. Proceeding to company verification…</p>
+            <p>Your password is set. Redirecting you to sign in…</p>
             <div className="pw-spinner" />
           </div>
         )}

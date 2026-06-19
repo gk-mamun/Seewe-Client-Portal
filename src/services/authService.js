@@ -38,6 +38,27 @@ export const authService = {
     return res.client;
   },
 
+  /**
+   * POST /client/activate → set the client's password and enable portal
+   * access. `identifier` is the registered username OR email.
+   *
+   * Backend rules: password min:6, must match `password_confirmation`.
+   * No token is returned — the client signs in afterwards via /login.
+   * Throws ApiError on no-match (404), already-activated (409) or
+   * validation failure (422); `err.data.message` holds the reason.
+   */
+  activate: async ({ identifier, password, passwordConfirmation }) => {
+    return api.post(
+      API_ENDPOINTS.CLIENT_ACTIVATE,
+      {
+        identifier,
+        password,
+        password_confirmation: passwordConfirmation,
+      },
+      { auth: false }
+    );
+  },
+
   /** Clear token + cached client and (best-effort) tell the backend. */
   logout: async () => {
     try { await api.post(API_ENDPOINTS.CLIENT_LOGOUT); } catch { /* ignore */ }

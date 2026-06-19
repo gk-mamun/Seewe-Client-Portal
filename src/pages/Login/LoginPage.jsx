@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
+  const [notice, setNotice]     = useState(location.state?.notice || '');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -21,6 +22,7 @@ export default function LoginPage() {
     if (submitting) return;
 
     setError('');
+    setNotice('');
     setSubmitting(true);
 
     try {
@@ -71,6 +73,7 @@ export default function LoginPage() {
         required
       />
 
+      {notice && <div className="lg-notice" role="status">{notice}</div>}
       {error && <div className="lg-error" role="alert">{error}</div>}
 
       <button type="submit" className="lg-btn" disabled={submitting}>

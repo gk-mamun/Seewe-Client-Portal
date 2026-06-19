@@ -14,9 +14,10 @@ export const API_BASE_URL =
 
 export const API_ENDPOINTS = {
   // ─── Auth ───────────────────────────────────────────────────────
-  CLIENT_LOGIN:  '/client/login',
-  CLIENT_LOGOUT: '/client/logout',
-  CLIENT_ME:     '/client/me',
+  CLIENT_LOGIN:    '/client/login',
+  CLIENT_LOGOUT:   '/client/logout',
+  CLIENT_ME:       '/client/me',
+  CLIENT_ACTIVATE: '/client/activate',
 
   // ─── Company / profile (placeholders for the next phase) ────────
   CLIENT_PROFILE: '/client/profile',
