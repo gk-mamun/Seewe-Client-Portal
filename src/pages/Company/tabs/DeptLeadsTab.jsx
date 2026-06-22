@@ -3,7 +3,8 @@ import DeptLeadCard from '../components/DeptLeadCard.jsx';
 import ChargeChip from '../../../components/ChargeChip/ChargeChip.jsx';
 import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import Button from '../../../components/Button/Button.jsx';
-import { ALL_CHARGES, DEFAULT_LEADS } from '../../../data/deptLeads.js';
+import { ALL_CHARGES } from '../../../data/deptLeads.js';
+import { contactToLead } from '../../../services/companyService.js';
 
 const CONTACT_PREFS = ['Email', 'WhatsApp', 'Both'];
 
@@ -11,8 +12,9 @@ const BLANK_EXTRA = {
   dept: '', lead: '', email: '', phone: '', wa: '', pref: 'Email', loc: 'Hong Kong SAR', charges: [],
 };
 
-export default function DeptLeadsTab({ editing }) {
-  const [leads, setLeads] = useState(DEFAULT_LEADS);
+export default function DeptLeadsTab({ editing, details }) {
+  // Dept leads come from the `contacts` collection on /client/details.
+  const [leads, setLeads] = useState(() => (details?.contacts ?? []).map(contactToLead));
   const [extras, setExtras] = useState([]);
   const [form, setForm] = useState(BLANK_EXTRA);
 
@@ -41,9 +43,12 @@ export default function DeptLeadsTab({ editing }) {
   return (
     <div className="dept-leads-wrap">
       <div className="dept-leads-grid">
+        {leads.length === 0 && (
+          <p className="extra-dept-form-desc">No department leads on record yet.</p>
+        )}
         {leads.map((lead, idx) => (
           <DeptLeadCard
-            key={lead.dept}
+            key={idx}
             lead={lead}
             isOps={idx === 0}
             showSameAsOps={idx !== 0}

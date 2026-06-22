@@ -1,23 +1,21 @@
 import { useState } from 'react';
 import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import Button from '../../../components/Button/Button.jsx';
-
-const DEFAULT_EARLY_OFF = [
-  { id: 'cny',    name: 'Chinese New Year Eve (Year 29/30)', time: '14:00', checked: true },
-  { id: 'newyr',  name: "New Year's Eve",                    time: '14:00', checked: true },
-  { id: 'xmas',   name: 'Christmas Eve',                     time: '14:00', checked: true },
-];
+import { festivalToHoliday } from '../../../services/companyService.js';
 
 const APPLY_COUNTRIES = ['Hong Kong', 'Malaysia', 'Philippines', 'Taiwan', 'Singapore', 'All Locations'];
 
 const BLANK_CUSTOM = { name: '', date: '', time: '14:00', applies: [] };
 
-export default function HolidaysTab({ editing }) {
-  const [hqCountry, setHqCountry] = useState('Hong Kong SAR');
+export default function HolidaysTab({ editing, details }) {
+  const [hqCountry, setHqCountry] = useState(details?.country || '');
   const [branchCountries, setBranchCountries] = useState([]);
   const [branchPick, setBranchPick] = useState('');
-  const [earlyOff, setEarlyOff] = useState(DEFAULT_EARLY_OFF);
-  const [customs, setCustoms] = useState([]);
+  const [earlyOff, setEarlyOff] = useState([]);
+  // Holidays come from the `festivals` collection on /client/details.
+  const [customs, setCustoms] = useState(() =>
+    (details?.festivals ?? []).map(festivalToHoliday).map((h) => ({ ...h, checked: true }))
+  );
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(BLANK_CUSTOM);
 

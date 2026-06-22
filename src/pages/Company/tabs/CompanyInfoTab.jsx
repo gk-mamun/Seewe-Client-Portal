@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import UploadBox from '../../../components/UploadBox/UploadBox.jsx';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import { assetUrl } from '../../../config/api.js';
+import { certificatePathOf } from '../../../services/companyService.js';
+
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
+const fileNameOf = (path) => String(path || '').split(/[\\/]/).pop() || 'certificate';
 
 const INDUSTRIES = [
   'Technology / IT', 'Software & SaaS', 'Finance & Banking', 'Insurance',
@@ -15,30 +20,32 @@ const INDUSTRIES = [
 
 const CONTACT_PREFS = ['WhatsApp', 'Email', 'Both'];
 
-export default function CompanyInfoTab() {
+export default function CompanyInfoTab({ details }) {
   const { client, updateClient } = useAuth();
 
-  // Prefill from the logged-in client; falls back to blanks so the inputs
-  // are always controlled.
+  // Prefill from the fetched company details (GET /client/details). Fields
+  // the backend doesn't return stay blank; inputs are always controlled.
   const [company, setCompany] = useState(() => ({
-    name:            client?.company_name    || '',
-    brn:             client?.brn             || '',
-    industry:        client?.industry        || 'Technology / IT',
-    yearEstablished: client?.year_established || '',
-    employees:       client?.employees       || '',
-    website:         client?.website         || '',
-    address:         client?.company_address || '',
-    country:         client?.country         || '',
-    intro:           client?.intro           || '',
+    name:            details?.company_name    || '',
+    brn:             details?.br_no           || '',
+    industry:        details?.industry        || '',
+    yearEstablished: details?.year_established || '',
+    employees:       details?.no_of_employees || '',
+    website:         details?.company_website || '',
+    address:         details?.company_address || '',
+    country:         details?.country         || '',
+    intro:           details?.basic_intro     || '',
   }));
+  // The Primary Contact card isn't part of /client/details (contacts feed
+  // the Dept Leads tab), so only the client email is known here.
   const [contact, setContact] = useState(() => ({
-    name:      client?.contact_name  || '',
-    title:     client?.contact_title || '',
-    officeNum: client?.office_number || '',
-    mobile:    client?.mobile        || '',
-    email:     client?.email         || '',
-    pref:      client?.contact_pref  || 'Both',
-    location:  client?.contact_location || client?.country || '',
+    name:      '',
+    title:     '',
+    officeNum: '',
+    mobile:    '',
+    email:     details?.email   || '',
+    pref:      'Both',
+    location:  details?.country || '',
   }));
 
   // Reflect changes back into the cached client object so the route
@@ -58,7 +65,14 @@ export default function CompanyInfoTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [company.name, company.address, company.country, contact.email]);
 
-  const [brFile, setBrFile] = useState({ name: 'BR_Certificate_BrightenTech_2026.pdf', verified: true });
+  // Existing certificate comes from /client/details; a freshly picked file
+  // gets a temporary object URL so it can be previewed/opened immediately.
+  const [brFile, setBrFile] = useState(() => {
+    const path = certificatePathOf(details);
+    if (!path) return null;
+    const url = assetUrl(path);
+    return { name: fileNameOf(path), url, isImage: IMAGE_RE.test(path), verified: true };
+  });
 
   const setC = (patch) => setCompany((c) => ({ ...c, ...patch }));
   const setX = (patch) => setContact((c) => ({ ...c, ...patch }));
@@ -81,6 +95,7 @@ export default function CompanyInfoTab() {
           <div className="field-block">
             <label className="tiny-label">Industry</label>
             <select className="tiny-select" value={company.industry} onChange={(e) => setC({ industry: e.target.value })}>
+              <option value="">— Select industry —</option>
               {INDUSTRIES.map((i) => <option key={i}>{i}</option>)}
             </select>
           </div>
@@ -177,13 +192,18 @@ export default function CompanyInfoTab() {
       {/* ── BR Certificate ── */}
       <section className="sett-panel">
         <h3 className="section-hd">Business Registration Certificate</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', gap: 14, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 240 }}>
             <UploadBox
               label="Click to upload BR Certificate"
               hint="PDF, JPG, PNG — max 10MB"
               maxMB={10}
-              onFile={(f) => f && setBrFile({ name: f.name, verified: false })}
+              onFile={(f) => f && setBrFile({
+                name: f.name,
+                url: URL.createObjectURL(f),
+                isImage: f.type.startsWith('image/') || IMAGE_RE.test(f.name),
+                verified: false,
+              })}
             />
           </div>
           {brFile && (
@@ -191,17 +211,42 @@ export default function CompanyInfoTab() {
               flex: 2, minWidth: 240,
               background: '#fff', border: '1px solid var(--c-border)',
               borderRadius: 8, padding: '12px 14px',
-              display: 'flex', alignItems: 'center', gap: 10,
+              display: 'flex', alignItems: 'center', gap: 12,
             }}>
-              <span style={{ fontSize: 20 }} aria-hidden="true">📄</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600 }}>{brFile.name}</div>
+              {brFile.isImage && brFile.url ? (
+                <a href={brFile.url} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={brFile.url}
+                    alt="BR certificate preview"
+                    style={{ width: 46, height: 46, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--c-border)', display: 'block' }}
+                  />
+                </a>
+              ) : (
+                <span style={{ fontSize: 24 }} aria-hidden="true">📄</span>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {brFile.name}
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--c-success)', fontWeight: 600 }}>
                   {brFile.verified ? '✓ Verified' : 'Pending verification'}
                 </div>
               </div>
-              <button type="button" className="btn bol" style={{ fontSize: 11, padding: '4px 10px' }}
-                onClick={() => setBrFile(null)}>✕</button>
+              {brFile.url && (
+                <a
+                  href={brFile.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: 12, fontWeight: 600, padding: '6px 14px',
+                    background: 'var(--brand-primary)', color: '#fff',
+                    borderRadius: 'var(--r-sm)', textDecoration: 'none',
+                    whiteSpace: 'nowrap', pointerEvents: 'auto',
+                  }}
+                >
+                  View
+                </a>
+              )}
             </div>
           )}
         </div>

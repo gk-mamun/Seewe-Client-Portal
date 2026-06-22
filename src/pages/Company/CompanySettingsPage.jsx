@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader.jsx';
 import Card from '../../components/Card/Card.jsx';
 import PageTabs from '../../components/PageTabs/PageTabs.jsx';
@@ -10,6 +10,7 @@ import OperationsTab  from './tabs/OperationsTab.jsx';
 import HolidaysTab    from './tabs/HolidaysTab.jsx';
 import BillingTab     from './tabs/BillingTab.jsx';
 
+import { companyService } from '../../services/companyService.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import './CompanySettingsPage.css';
 import './tabs/dept-leads.css';
@@ -38,6 +39,20 @@ export default function CompanySettingsPage() {
   const [tab, setTab] = useState('company');
   const [editing, setEditing] = useState(false);
 
+  const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    companyService
+      .getDetails()
+      .then((d) => { if (alive) setDetails(d); })
+      .catch((err) => { if (alive) setError(err?.message || 'Failed to load company details.'); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, []);
+
   const ActiveTab = TAB_COMPONENTS[tab];
 
   return (
@@ -59,7 +74,13 @@ export default function CompanySettingsPage() {
       <Card>
         <div className={`form-body ${editing ? '' : 'sett-view'}`}>
           <PageTabs tabs={TABS} active={tab} onChange={setTab} />
-          <ActiveTab editing={editing} />
+          {loading ? (
+            <div style={{ padding: 24, color: 'var(--c-text-soft)' }}>Loading company details…</div>
+          ) : error ? (
+            <div style={{ padding: 24, color: 'var(--c-danger)' }}>{error}</div>
+          ) : (
+            <ActiveTab editing={editing} details={details} />
+          )}
         </div>
       </Card>
     </>
