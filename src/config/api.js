@@ -34,6 +34,9 @@ export const API_ENDPOINTS = {
   CLIENT_ACTIVATE: '/client/activate',
 
   // ─── Company / profile ─────────────────────────────────────────
-  CLIENT_PROFILE: '/client/profile',
-  CLIENT_DETAILS: '/client/details',   // GET full company profile (+ contacts, festivals)
+  CLIENT_PROFILE:      '/client/profile',
+  CLIENT_DETAILS:      '/client/details',          // GET full company profile (+ contacts, festivals)
+  CLIENT_SAVE_DETAILS:   '/client/save-client-details',   // POST bulk company info + contacts + festivals
+  CLIENT_SAVE_CONTACT:   '/client/save-client-contact',   // POST a single new contact
+  CLIENT_DELETE_CONTACT: '/client/delete-client-contact', // POST { id } to delete one contact
 };

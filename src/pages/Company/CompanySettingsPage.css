@@ -17,6 +17,26 @@
 .sett-view label { pointer-events: none !important; cursor: default !important; }
 .sett-view .btn  { pointer-events: none !important; opacity: 0.25 !important; }
 
+/* Save feedback banners */
+.sett-error {
+  padding: 10px 14px;
+  background: var(--c-danger-bg);
+  border: 1px solid var(--c-danger-border);
+  color: var(--c-danger-dark);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+}
+.sett-ok {
+  padding: 10px 14px;
+  background: var(--c-success-bg);
+  border: 1px solid var(--c-success-border);
+  color: var(--c-success);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+}
+
 /* Section panel — reused across all 5 tabs */
 .sett-panel {
   background: var(--c-surface-alt);

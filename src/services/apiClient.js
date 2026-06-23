@@ -28,9 +28,13 @@ export const setToken = (token) => {
  * Most callers will use `api.get` / `api.post` / `api.put` / `api.delete`.
  */
 async function request(endpoint, { method = 'GET', body, auth = true, headers = {} } = {}) {
+  // FormData (file uploads) must be sent as-is so the browser sets the
+  // multipart boundary; only JSON bodies get the JSON Content-Type + stringify.
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+
   const finalHeaders = {
     Accept: 'application/json',
-    ...(body ? { 'Content-Type': 'application/json' } : {}),
+    ...(body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...headers,
   };
 
@@ -44,7 +48,7 @@ async function request(endpoint, { method = 'GET', body, auth = true, headers = 
     res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method,
       headers: finalHeaders,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
     });
   } catch (networkErr) {
     throw new ApiError('Network error — please check your connection.', 0, null);

@@ -3,7 +3,7 @@ import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import UploadBox from '../../../components/UploadBox/UploadBox.jsx';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import { assetUrl } from '../../../config/api.js';
-import { certificatePathOf } from '../../../services/companyService.js';
+import { certificatePathOf, detailsToCompany, detailsToContact } from '../../../services/companyService.js';
 
 const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 const fileNameOf = (path) => String(path || '').split(/[\\/]/).pop() || 'certificate';
@@ -20,33 +20,22 @@ const INDUSTRIES = [
 
 const CONTACT_PREFS = ['WhatsApp', 'Email', 'Both'];
 
-export default function CompanyInfoTab({ details }) {
+export default function CompanyInfoTab({ details, value, onChange, editing }) {
   const { client, updateClient } = useAuth();
+  // The newly picked BR certificate File (if any), carried up for the save.
+  const [certFile, setCertFile] = useState(value?.certFile ?? null);
 
-  // Prefill from the fetched company details (GET /client/details). Fields
-  // the backend doesn't return stay blank; inputs are always controlled.
-  const [company, setCompany] = useState(() => ({
-    name:            details?.company_name    || '',
-    brn:             details?.br_no           || '',
-    industry:        details?.industry        || '',
-    yearEstablished: details?.year_established || '',
-    employees:       details?.no_of_employees || '',
-    website:         details?.company_website || '',
-    address:         details?.company_address || '',
-    country:         details?.country         || '',
-    intro:           details?.basic_intro     || '',
-  }));
-  // The Primary Contact card isn't part of /client/details (contacts feed
-  // the Dept Leads tab), so only the client email is known here.
-  const [contact, setContact] = useState(() => ({
-    name:      '',
-    title:     '',
-    officeNum: '',
-    mobile:    '',
-    email:     details?.email   || '',
-    pref:      'Both',
-    location:  details?.country || '',
-  }));
+  // Source of truth is the section the page owns (`value`); falls back to the
+  // fetched details so inputs are always controlled even before the first sync.
+  const [company, setCompany] = useState(() => value?.company ?? detailsToCompany(details));
+  // Primary Contact = the contact row flagged is_primary = 1.
+  const [contact, setContact] = useState(() => value?.contact ?? detailsToContact(details));
+
+  // Push edits up to the page so a single Save can read this section.
+  useEffect(() => {
+    onChange?.({ company, contact, certFile });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company, contact, certFile]);
 
   // Reflect changes back into the cached client object so the route
   // guard re-evaluates whenever the required fields are filled in.
@@ -193,19 +182,31 @@ export default function CompanyInfoTab({ details }) {
       <section className="sett-panel">
         <h3 className="section-hd">Business Registration Certificate</h3>
         <div style={{ display: 'flex', alignItems: 'stretch', gap: 14, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <UploadBox
-              label="Click to upload BR Certificate"
-              hint="PDF, JPG, PNG — max 10MB"
-              maxMB={10}
-              onFile={(f) => f && setBrFile({
-                name: f.name,
-                url: URL.createObjectURL(f),
-                isImage: f.type.startsWith('image/') || IMAGE_RE.test(f.name),
-                verified: false,
-              })}
-            />
-          </div>
+          {/* File selection is only allowed in edit mode. */}
+          {editing && (
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <UploadBox
+                label="Click to upload BR Certificate"
+                hint="PDF, JPG, PNG — max 10MB"
+                maxMB={10}
+                onFile={(f) => {
+                  if (!f) return;
+                  setCertFile(f);
+                  setBrFile({
+                    name: f.name,
+                    url: URL.createObjectURL(f),
+                    isImage: f.type.startsWith('image/') || IMAGE_RE.test(f.name),
+                    verified: false,
+                  });
+                }}
+              />
+            </div>
+          )}
+          {!editing && !brFile && (
+            <div style={{ flex: 1, minWidth: 240, color: 'var(--c-text-soft)', fontSize: 13, display: 'flex', alignItems: 'center' }}>
+              No certificate uploaded.
+            </div>
+          )}
           {brFile && (
             <div style={{
               flex: 2, minWidth: 240,

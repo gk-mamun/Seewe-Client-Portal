@@ -12,6 +12,9 @@ export default function DeptLeadCard({
   lead,
   onChange,
   onToggleSameAsOps,
+  onRemove,
+  editing = false,
+  deleting = false,
   isOps = false,
   showSameAsOps = false,
 }) {
@@ -24,6 +27,13 @@ export default function DeptLeadCard({
     });
   };
 
+  // Show the standard charges plus any backend value not in the built-in
+  // list (e.g. "Service Agreement") so the contact's data is fully reflected.
+  const chargeOptions = [
+    ...ALL_CHARGES,
+    ...(lead.charges || []).filter((c) => !ALL_CHARGES.includes(c)),
+  ];
+
   return (
     <article className="dept-lead-card">
       <header className="dlc-hd">
@@ -31,12 +41,30 @@ export default function DeptLeadCard({
           <span className="dlc-icon" aria-hidden="true">{lead.icon}</span>
           <span>{lead.dept}</span>
         </div>
-        {showSameAsOps && !isOps && (
-          <label className="dlc-same">
-            <input type="checkbox" onChange={onToggleSameAsOps} />
-            Same as Operations
-          </label>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {showSameAsOps && !isOps && (
+            <label className="dlc-same">
+              <input type="checkbox" onChange={onToggleSameAsOps} />
+              Same as Operations
+            </label>
+          )}
+          {editing && onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              disabled={deleting}
+              aria-label="Remove contact"
+              style={{
+                border: 'none', background: 'none',
+                cursor: deleting ? 'wait' : 'pointer',
+                color: 'var(--c-danger)', fontSize: 15, lineHeight: 1, padding: 2,
+                opacity: deleting ? 0.4 : 1,
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="grid-2" style={{ gap: 8 }}>
@@ -83,7 +111,7 @@ export default function DeptLeadCard({
       <div>
         <label className="tiny-label">In-Charge Of</label>
         <div className="dlc-charges">
-          {ALL_CHARGES.map((ch) => (
+          {chargeOptions.map((ch) => (
             <ChargeChip
               key={ch}
               charge={ch}

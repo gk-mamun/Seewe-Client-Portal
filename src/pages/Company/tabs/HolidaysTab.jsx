@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CountrySelect from '../../../components/CountrySelect/CountrySelect.jsx';
 import Button from '../../../components/Button/Button.jsx';
 import { festivalToHoliday } from '../../../services/companyService.js';
@@ -7,17 +7,25 @@ const APPLY_COUNTRIES = ['Hong Kong', 'Malaysia', 'Philippines', 'Taiwan', 'Sing
 
 const BLANK_CUSTOM = { name: '', date: '', time: '14:00', applies: [] };
 
-export default function HolidaysTab({ editing, details }) {
-  const [hqCountry, setHqCountry] = useState(details?.country || '');
-  const [branchCountries, setBranchCountries] = useState([]);
+export default function HolidaysTab({ editing, value, onChange, details }) {
+  // Source of truth is the page-owned `value`; falls back to fetched details.
+  const [hqCountry, setHqCountry] = useState(value?.hqCountry ?? (details?.country || ''));
+  const [branchCountries, setBranchCountries] = useState(value?.branchCountries ?? []);
   const [branchPick, setBranchPick] = useState('');
-  const [earlyOff, setEarlyOff] = useState([]);
+  const [earlyOff, setEarlyOff] = useState(value?.earlyOff ?? []);
   // Holidays come from the `festivals` collection on /client/details.
   const [customs, setCustoms] = useState(() =>
+    value?.customs ??
     (details?.festivals ?? []).map(festivalToHoliday).map((h) => ({ ...h, checked: true }))
   );
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(BLANK_CUSTOM);
+
+  // Push edits up so the bulk Save includes the holiday section.
+  useEffect(() => {
+    onChange?.({ hqCountry, branchCountries, earlyOff, customs });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hqCountry, branchCountries, earlyOff, customs]);
 
   const addBranch = () => {
     if (!branchPick || branchCountries.includes(branchPick)) return;
