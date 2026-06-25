@@ -1,115 +1,195 @@
 import { useState } from 'react';
 import Alert from '../../../components/Alert/Alert.jsx';
+import { assetUrl } from '../../../config/api.js';
+import { companyService, detailsToBilling } from '../../../services/companyService.js';
 
-const BILLING_SETTINGS = [
-  { lbl: 'Invoice Currency',     val: 'HKD — Hong Kong Dollar' },
-  { lbl: 'Payment Terms',        val: '1 month in advance' },
-  { lbl: 'Invoice Frequency',    val: 'Monthly' },
-  { lbl: 'Monthly Invoice Date', val: '15th of every month' },
-];
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
+const fileNameOf = (path) => String(path || '').split(/[\\/]/).pop() || 'agreement';
 
-export default function BillingTab() {
-  const [contact, setContact] = useState({
-    name: '', title: '', email: '', whatsapp: '',
-  });
-  const [agreement, setAgreement] = useState(null);
+const STATUS_TONE = { active: 'grn', inactive: 'red', pending: 'amb' };
+const titleCase = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
+/** Show a date (ISO date or datetime) as DD/MM/YYYY, ignoring any time/zone. */
+const fmtDate = (v) => {
+  const m = String(v ?? '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (v ?? '');
+};
+
+/** Shared sizing so View and Choose File render as an equal-sized pair. */
+const BTN_BASE = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 34,
+  padding: '0 16px',
+  fontSize: 12,
+  fontWeight: 600,
+  lineHeight: 1,
+  borderRadius: 'var(--r-sm)',
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  cursor: 'pointer',
+  boxSizing: 'border-box',
+};
+
+export default function BillingTab({ editing, details }) {
+  const billing = detailsToBilling(details);
+
+  // Billing contact — not yet sourced from the backend, kept empty for now.
+  const [contact, setContact] = useState({ name: '', title: '', email: '', whatsapp: '' });
   const setC = (patch) => setContact((c) => ({ ...c, ...patch }));
 
-  const handleFile = (e) => {
+  // Existing signed agreement (from billing_info) or a freshly uploaded file.
+  const [agreement, setAgreement] = useState(() => {
+    const path = billing?.agreementPath;
+    if (!path) return null;
+    return { name: fileNameOf(path), url: assetUrl(path), isImage: IMAGE_RE.test(path) };
+  });
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState('');
+  const [uploadOk, setUploadOk] = useState(false);
+
+  // Upload immediately to its own endpoint (independent of "Save Changes").
+  const onPick = async (e) => {
     const f = e.target.files?.[0];
-    if (f) setAgreement(f);
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!f) return;
+    setUploadErr('');
+    setUploadOk(false);
+    setUploading(true);
+    try {
+      const res = await companyService.uploadAgreement(f);
+      const path = res?.agreement; // backend returns the stored path
+      setAgreement(
+        path
+          ? { name: fileNameOf(path), url: assetUrl(path), isImage: IMAGE_RE.test(path) }
+          : { name: f.name, url: URL.createObjectURL(f), isImage: f.type.startsWith('image/') || IMAGE_RE.test(f.name) }
+      );
+      setUploadOk(true);
+    } catch (err) {
+      setUploadErr(err?.message || 'Could not upload the agreement. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
+
+  const ROWS = billing
+    ? [
+        { lbl: 'Invoice Currency',     val: billing.invoiceCurrency },
+        { lbl: 'Payment Terms',        val: billing.paymentTerms },
+        { lbl: 'Invoice Frequency',    val: billing.invoiceFrequency },
+        { lbl: 'Monthly Invoice Date', val: fmtDate(billing.monthlyInvoiceDate) },
+      ]
+    : [];
 
   return (
     <>
       <Alert tone="amber" title="Billing settings are managed by SeeWe Work">
-        Contact your account manager to make changes.
+        These details are read-only. You can upload your signed agreement below. Contact your account manager for any changes.
       </Alert>
 
-      {/* ── Settings + Contact ── */}
-      <div className="grid-2" style={{ gap: 16, marginBottom: 16 }}>
-        <section className="bill-panel">
-          <h3 className="bill-section-title">💳 Billing Settings</h3>
-          {BILLING_SETTINGS.map((row) => (
-            <div key={row.lbl} className="bill-row">
-              <span className="bill-row-lbl">{row.lbl}</span>
-              <span className="bill-row-val">{row.val}</span>
-            </div>
-          ))}
-          <div className="bill-row">
-            <span className="bill-row-lbl">Current Status</span>
-            <span className="ba grn">Active</span>
-          </div>
-        </section>
+      {!billing ? (
+        <p className="extra-dept-form-desc">No billing information available yet.</p>
+      ) : (
+        <>
+          {/* ── Settings (read-only) + Contact ── */}
+          <div className="grid-2" style={{ gap: 16, marginBottom: 16 }}>
+            <section className="bill-panel">
+              <h3 className="bill-section-title">💳 Billing Settings</h3>
+              {ROWS.map((row) => (
+                <div key={row.lbl} className="bill-row">
+                  <span className="bill-row-lbl">{row.lbl}</span>
+                  <span className="bill-row-val">{row.val || '—'}</span>
+                </div>
+              ))}
+              <div className="bill-row">
+                <span className="bill-row-lbl">Current Status</span>
+                <span className={`ba ${STATUS_TONE[billing.currentStatus] || 'grn'}`}>
+                  {titleCase(billing.currentStatus) || '—'}
+                </span>
+              </div>
+            </section>
 
-        <section className="bill-panel">
-          <h3 className="bill-section-title">📞 Your Billing Contact Information</h3>
+            <section className="bill-panel">
+              <h3 className="bill-section-title">📞 Your Billing Contact Information</h3>
+              <div className="grid-2">
+                <div className="field-block">
+                  <label className="tiny-label">Contact Person Name</label>
+                  <input className="tiny-input" placeholder="e.g. Sarah Lim"
+                    value={contact.name} onChange={(e) => setC({ name: e.target.value })} />
+                </div>
+                <div className="field-block">
+                  <label className="tiny-label">Job Title</label>
+                  <input className="tiny-input" placeholder="e.g. Finance Manager"
+                    value={contact.title} onChange={(e) => setC({ title: e.target.value })} />
+                </div>
+              </div>
+              <div className="field-block">
+                <label className="tiny-label">Billing Email</label>
+                <input className="tiny-input" type="email" placeholder="billing@yourcompany.com"
+                  value={contact.email} onChange={(e) => setC({ email: e.target.value })} />
+              </div>
+              <div className="field-block" style={{ marginBottom: 4 }}>
+                <label className="tiny-label">WhatsApp (Invoice Notifications)</label>
+                <input className="tiny-input" type="tel" placeholder="+852 XXXX XXXX"
+                  value={contact.whatsapp} onChange={(e) => setC({ whatsapp: e.target.value })} />
+                <div className="hol-help">💬 Invoice notifications will be sent via WhatsApp</div>
+              </div>
+            </section>
+          </div>
 
-          <div className="grid-2">
-            <div className="field-block">
-              <label className="tiny-label">Contact Person Name</label>
-              <input className="tiny-input" placeholder="e.g. Sarah Lim"
-                value={contact.name} onChange={(e) => setC({ name: e.target.value })} />
-            </div>
-            <div className="field-block">
-              <label className="tiny-label">Job Title</label>
-              <input className="tiny-input" placeholder="e.g. Finance Manager"
-                value={contact.title} onChange={(e) => setC({ title: e.target.value })} />
-            </div>
-          </div>
-          <div className="field-block">
-            <label className="tiny-label">Billing Email</label>
-            <input className="tiny-input" type="email" placeholder="billing@yourcompany.com"
-              value={contact.email} onChange={(e) => setC({ email: e.target.value })} />
-          </div>
-          <div className="field-block" style={{ marginBottom: 4 }}>
-            <label className="tiny-label">WhatsApp (Invoice Notifications)</label>
-            <input className="tiny-input" type="tel" placeholder="+852 XXXX XXXX"
-              value={contact.whatsapp} onChange={(e) => setC({ whatsapp: e.target.value })} />
-            <div className="hol-help">💬 Invoice notifications will be sent via WhatsApp</div>
-          </div>
-        </section>
-      </div>
+          {/* ── Notice (HTML from backend) ── */}
+          {billing.notice && (
+            <section className="bill-notice">
+              <h4>⚠ Payment Terms &amp; Adjustment Notice</h4>
+              <div dangerouslySetInnerHTML={{ __html: billing.notice }} />
+            </section>
+          )}
 
-      {/* ── Payment Terms Notice ── */}
-      <section className="bill-notice">
-        <h4>⚠ Payment Terms &amp; Adjustment Notice</h4>
-        <ul>
-          <li>
-            Payment is due <strong>1 month in advance</strong>. Invoice issued on the{' '}
-            <strong>15th of each month</strong>.
-          </li>
-          <li>
-            If there is a <strong>payment float</strong> (difference between expected and received amount),
-            the adjustment will be reflected in the <strong>following month&apos;s invoice</strong>.
-          </li>
-          <li>
-            Exchange rate follows the <strong>actual bank rate</strong> on the transaction date,
-            per the signed service agreement.
-          </li>
-        </ul>
-      </section>
+          {/* ── Contract Agreement ── */}
+          <section className="bill-panel">
+            <h3 className="bill-section-title">📄 Contract Agreement</h3>
+            <div className="bill-contract-row">
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Signed Agreement</div>
+                <div style={{ fontSize: 12, color: 'var(--c-text-soft)' }}>
+                  Upload your signed service agreement. Accepted formats: PDF, DOC, DOCX, JPG, PNG (max 10MB)
+                </div>
+              </div>
 
-      {/* ── Contract Agreement ── */}
-      <section className="bill-panel">
-        <h3 className="bill-section-title">📄 Contract Agreement</h3>
-        <div className="bill-contract-row">
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Upload Signed Agreement</div>
-            <div style={{ fontSize: 12, color: 'var(--c-text-soft)' }}>
-              Upload your signed service agreement or contract. Accepted formats: PDF, DOC, DOCX (max 10MB)
+              {agreement?.url && (
+                <a
+                  href={agreement.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ ...BTN_BASE, background: 'var(--brand-primary)', color: '#fff' }}
+                >
+                  View
+                </a>
+              )}
+
+              {editing && (
+                <label
+                  className="bill-file-btn"
+                  style={{
+                    ...BTN_BASE,
+                    background: '#fff',
+                    color: 'var(--brand-primary)',
+                    border: '1.5px solid var(--brand-primary)',
+                    ...(uploading ? { pointerEvents: 'none', opacity: 0.6 } : {}),
+                  }}
+                >
+                  <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" hidden onChange={onPick} disabled={uploading} />
+                  {uploading ? 'Uploading…' : '📎 Choose File'}
+                </label>
+              )}
             </div>
-          </div>
-          <label className="bill-file-btn">
-            <input type="file" accept=".pdf,.doc,.docx" hidden onChange={handleFile} />
-            <span className="btn bdk">📎 Choose File</span>
-          </label>
-        </div>
-        {agreement && (
-          <div className="bill-file-name">{agreement.name}</div>
-        )}
-      </section>
+            {agreement && <div className="bill-file-name">{agreement.name}</div>}
+            {uploadErr && <div className="sett-error" role="alert" style={{ marginTop: 8 }}>{uploadErr}</div>}
+            {uploadOk && <div className="sett-ok" role="status" style={{ marginTop: 8 }}>✓ Agreement uploaded.</div>}
+          </section>
+        </>
+      )}
     </>
   );
 }

@@ -20,19 +20,21 @@ export const companyService = {
 
   /**
    * POST /client/save-client-details → bulk company info + contacts + festivals.
-   * If `file` (a new BR certificate) is provided, the request is sent as
-   * multipart/form-data: scalars become form fields, nested arrays/objects are
-   * JSON-encoded, and the file is attached as `business_reg_certificate`.
+   * `files` maps a backend field name → File (e.g. `business_reg_certificate`,
+   * `billing_agreement`). If any file is present the request is multipart:
+   * scalars become form fields, nested arrays/objects are JSON-encoded, and
+   * each file is attached under its field name. Otherwise plain JSON is sent.
    */
-  saveDetails: async (payload, file) => {
-    if (!file) return api.post(API_ENDPOINTS.CLIENT_SAVE_DETAILS, payload);
+  saveDetails: async (payload, files = {}) => {
+    const fileEntries = Object.entries(files).filter(([, f]) => f);
+    if (fileEntries.length === 0) return api.post(API_ENDPOINTS.CLIENT_SAVE_DETAILS, payload);
 
     const fd = new FormData();
     Object.entries(payload ?? {}).forEach(([key, val]) => {
       if (val == null) return;
       fd.append(key, Array.isArray(val) || typeof val === 'object' ? JSON.stringify(val) : val);
     });
-    fd.append('business_reg_certificate', file);
+    fileEntries.forEach(([field, f]) => fd.append(field, f));
     return api.post(API_ENDPOINTS.CLIENT_SAVE_DETAILS, fd);
   },
 
@@ -41,6 +43,13 @@ export const companyService = {
 
   /** POST /client/deleteClientContact → delete one contact by id. */
   deleteContact: async (id) => api.post(API_ENDPOINTS.CLIENT_DELETE_CONTACT, { id }),
+
+  /** POST /client/save-client-agreement → upload the signed billing agreement (multipart). */
+  uploadAgreement: async (file) => {
+    const fd = new FormData();
+    fd.append('agreement', file);
+    return api.post(API_ENDPOINTS.CLIENT_SAVE_AGREEMENT, fd);
+  },
 };
 
 /**
@@ -140,6 +149,23 @@ export const detailsToHolidays = (d = {}) => ({
   earlyOff:        [],
   customs:         (d.festivals ?? []).map(festivalToHoliday).map((h) => ({ ...h, checked: true })),
 });
+
+/** Billing tab data (read-only except the agreement file).
+ *  Returns null when there's no real billing row (no id) — the client can't
+ *  upload an agreement because there'd be nothing to update. */
+export const detailsToBilling = (d = {}) => {
+  const b = d.billing_info;
+  if (!b || b.id == null) return null;
+  return {
+    invoiceCurrency:    b.invoice_currency ?? '',
+    paymentTerms:       b.payment_terms ?? '',
+    invoiceFrequency:   b.invoice_frequency ?? '',
+    monthlyInvoiceDate: b.monthly_invoice_date ?? '',
+    currentStatus:      b.current_status ?? '',
+    notice:             b.notice ?? '',
+    agreementPath:      b.agreement ?? '',
+  };
+};
 
 /* ───────────────────────────────────────────────────────────────────
    Save mappers: section shapes → backend columns. Mirrors the fetch

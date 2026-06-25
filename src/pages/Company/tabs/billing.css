@@ -21,7 +21,13 @@
 }
 .bill-row:last-child { border-bottom: none; }
 .bill-row-lbl { font-size: 12px; color: var(--c-text-soft); font-weight: 600; }
-.bill-row-val { font-size: 13px; font-weight: 700; color: var(--c-text); }
+.bill-row-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text);
+  white-space: pre-line; /* preserve newlines stored in the DB (e.g. payment terms) */
+  text-align: right;
+}
 
 .bill-notice {
   background: var(--c-warning-bg);

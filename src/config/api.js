@@ -39,4 +39,5 @@ export const API_ENDPOINTS = {
   CLIENT_SAVE_DETAILS:   '/client/save-client-details',   // POST bulk company info + contacts + festivals
   CLIENT_SAVE_CONTACT:   '/client/save-client-contact',   // POST a single new contact
   CLIENT_DELETE_CONTACT: '/client/delete-client-contact', // POST { id } to delete one contact
+  CLIENT_SAVE_AGREEMENT: '/client/save-client-agreement', // POST multipart { agreement: file }
 };

@@ -106,7 +106,9 @@ export default function CompanySettingsPage() {
     setSaveOk(false);
     try {
       const payload = buildDetailsPayload({ info, leads, holidays });
-      await companyService.saveDetails(payload, info?.certFile);
+      await companyService.saveDetails(payload, {
+        business_reg_certificate: info?.certFile,
+      });
       // Keep the cached client (sidebar + completeness gate) in sync.
       updateClient({
         company_name:    info?.company?.name ?? '',
