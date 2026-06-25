@@ -15,6 +15,7 @@ import {
   companyService,
   detailsToCompany,
   detailsToContact,
+  detailsToBillingContact,
   detailsToHolidays,
   contactToLead,
   buildDetailsPayload,
@@ -42,13 +43,16 @@ const TAB_COMPONENTS = {
   billing:    BillingTab,
 };
 
-/** Build the three editable sections from a fetched details payload. */
+/** Build the editable sections from a fetched details payload. */
 const sectionsFromDetails = (d) => ({
   info: { company: detailsToCompany(d), contact: detailsToContact(d) },
-  // Dept leads are the non-primary contacts; the primary one lives in the
-  // Company Info tab's Primary Contact card.
-  leads: (d?.contacts ?? []).filter((c) => Number(c.is_primary) !== 1).map(contactToLead),
+  // Dept leads are contacts whose purpose isn't primary or billing (those live
+  // in the Company Info and Billing tabs). Unknown/legacy purposes count as leads.
+  leads: (d?.contacts ?? [])
+    .filter((c) => c.purpose !== 'primary' && c.purpose !== 'billing')
+    .map(contactToLead),
   holidays: detailsToHolidays(d),
+  billingContact: detailsToBillingContact(d),
 });
 
 export default function CompanySettingsPage() {
@@ -65,6 +69,7 @@ export default function CompanySettingsPage() {
   const [info, setInfo] = useState(null);
   const [leads, setLeads] = useState(null);
   const [holidays, setHolidays] = useState(null);
+  const [billingContact, setBillingContact] = useState(null);
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -83,6 +88,7 @@ export default function CompanySettingsPage() {
         setInfo(s.info);
         setLeads(s.leads);
         setHolidays(s.holidays);
+        setBillingContact(s.billingContact);
       })
       .catch((err) => { if (alive) setError(err?.message || 'Failed to load company details.'); })
       .finally(() => { if (alive) setLoading(false); });
@@ -94,6 +100,7 @@ export default function CompanySettingsPage() {
     setInfo(s.info);
     setLeads(s.leads);
     setHolidays(s.holidays);
+    setBillingContact(s.billingContact);
     setSaveError('');
     setEditing(false);
     setFormVersion((v) => v + 1);
@@ -105,7 +112,7 @@ export default function CompanySettingsPage() {
     setSaveError('');
     setSaveOk(false);
     try {
-      const payload = buildDetailsPayload({ info, leads, holidays });
+      const payload = buildDetailsPayload({ info, leads, holidays, billingContact });
       await companyService.saveDetails(payload, {
         business_reg_certificate: info?.certFile,
       });
@@ -144,6 +151,7 @@ export default function CompanySettingsPage() {
     company:  { value: info,     onChange: setInfo },
     team:     { value: leads,    onChange: setLeads, onContactAdded: handleContactAdded, onContactDeleted: handleContactDeleted },
     holidays: { value: holidays, onChange: setHolidays },
+    billing:  { value: billingContact, onChange: setBillingContact },
   }[tab] || {};
 
   return (

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Alert from '../../../components/Alert/Alert.jsx';
 import { assetUrl } from '../../../config/api.js';
-import { companyService, detailsToBilling } from '../../../services/companyService.js';
+import { companyService, detailsToBilling, detailsToBillingContact } from '../../../services/companyService.js';
 
 const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 const fileNameOf = (path) => String(path || '').split(/[\\/]/).pop() || 'agreement';
@@ -32,12 +32,17 @@ const BTN_BASE = {
   boxSizing: 'border-box',
 };
 
-export default function BillingTab({ editing, details }) {
+export default function BillingTab({ editing, details, value, onChange }) {
   const billing = detailsToBilling(details);
 
-  // Billing contact — not yet sourced from the backend, kept empty for now.
-  const [contact, setContact] = useState({ name: '', title: '', email: '', whatsapp: '' });
-  const setC = (patch) => setContact((c) => ({ ...c, ...patch }));
+  // Billing contact (purpose === 'billing') — editable; synced to the page so
+  // it's saved with "Save Changes".
+  const [billingContact, setBillingContact] = useState(() => value ?? detailsToBillingContact(details));
+  const setBC = (patch) => setBillingContact((b) => ({ ...b, ...patch }));
+  useEffect(() => {
+    onChange?.(billingContact);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [billingContact]);
 
   // Existing signed agreement (from billing_info) or a freshly uploaded file.
   const [agreement, setAgreement] = useState(() => {
@@ -85,7 +90,7 @@ export default function BillingTab({ editing, details }) {
   return (
     <>
       <Alert tone="amber" title="Billing settings are managed by SeeWe Work">
-        These details are read-only. You can upload your signed agreement below. Contact your account manager for any changes.
+        Invoice settings are read-only. You can edit your billing contact and upload your signed agreement below.
       </Alert>
 
       {!billing ? (
@@ -116,23 +121,23 @@ export default function BillingTab({ editing, details }) {
                 <div className="field-block">
                   <label className="tiny-label">Contact Person Name</label>
                   <input className="tiny-input" placeholder="e.g. Sarah Lim"
-                    value={contact.name} onChange={(e) => setC({ name: e.target.value })} />
+                    value={billingContact.name} onChange={(e) => setBC({ name: e.target.value })} />
                 </div>
                 <div className="field-block">
                   <label className="tiny-label">Job Title</label>
                   <input className="tiny-input" placeholder="e.g. Finance Manager"
-                    value={contact.title} onChange={(e) => setC({ title: e.target.value })} />
+                    value={billingContact.title} onChange={(e) => setBC({ title: e.target.value })} />
                 </div>
               </div>
               <div className="field-block">
                 <label className="tiny-label">Billing Email</label>
                 <input className="tiny-input" type="email" placeholder="billing@yourcompany.com"
-                  value={contact.email} onChange={(e) => setC({ email: e.target.value })} />
+                  value={billingContact.email} onChange={(e) => setBC({ email: e.target.value })} />
               </div>
               <div className="field-block" style={{ marginBottom: 4 }}>
                 <label className="tiny-label">WhatsApp (Invoice Notifications)</label>
                 <input className="tiny-input" type="tel" placeholder="+852 XXXX XXXX"
-                  value={contact.whatsapp} onChange={(e) => setC({ whatsapp: e.target.value })} />
+                  value={billingContact.whatsapp} onChange={(e) => setBC({ whatsapp: e.target.value })} />
                 <div className="hol-help">💬 Invoice notifications will be sent via WhatsApp</div>
               </div>
             </section>

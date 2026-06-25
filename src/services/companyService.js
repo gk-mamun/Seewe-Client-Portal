@@ -125,12 +125,12 @@ export const detailsToCompany = (d = {}) => ({
 });
 
 /**
- * The Primary Contact card is the contact row flagged is_primary = 1.
- * If there's no such row, every field stays blank (no client email/country
- * fallback) — so an untouched block shows nothing and isn't saved as a row.
+ * The Primary Contact card is the contact row with purpose === 'primary'.
+ * If there's no such row, every field stays blank — so an untouched block
+ * shows nothing and isn't saved as a row.
  */
 export const detailsToContact = (d = {}) => {
-  const primary = (d.contacts ?? []).find((c) => Number(c.is_primary) === 1) ?? {};
+  const primary = (d.contacts ?? []).find((c) => c.purpose === 'primary') ?? {};
   return {
     id:        primary.id,
     name:      primary.name ?? '',
@@ -140,6 +140,19 @@ export const detailsToContact = (d = {}) => {
     email:     primary.email ?? '',
     pref:      primary.contact_preference ?? 'Both',
     location:  primary.location ?? '',
+  };
+};
+
+/** The Billing contact (purpose === 'billing'). Always returns a shape so the
+ *  fields are editable even when no billing contact exists yet. */
+export const detailsToBillingContact = (d = {}) => {
+  const b = (d.contacts ?? []).find((c) => c.purpose === 'billing') ?? {};
+  return {
+    id:       b.id,
+    name:     b.name ?? '',
+    title:    b.title ?? '',
+    email:    b.email ?? '',
+    whatsapp: b.whatsapp_mobile ?? '',
   };
 };
 
@@ -182,10 +195,10 @@ const leadToContact = (l = {}) => ({
   whatsapp_mobile: l.phone ?? '',
   email:           l.email ?? '',
   incharge:        Array.isArray(l.charges) ? l.charges : [],
-  is_primary:      0,
+  purpose:         'lead',
 });
 
-/** Primary Contact card → ClientContact columns (is_primary = 1). */
+/** Primary Contact card → ClientContact columns (purpose = 'primary'). */
 const primaryToContact = (x = {}) => ({
   ...(Number.isInteger(x.id) ? { id: x.id } : {}),
   name:               x.name ?? '',
@@ -197,7 +210,20 @@ const primaryToContact = (x = {}) => ({
   contact_preference: x.pref ?? '',
   location:           x.location ?? '',
   incharge:           [],
-  is_primary:         1,
+  purpose:            'primary',
+});
+
+/** Billing Contact card → ClientContact columns (purpose = 'billing'). */
+const billingToContact = (b = {}) => ({
+  ...(Number.isInteger(b.id) ? { id: b.id } : {}),
+  name:            b.name ?? '',
+  title:           b.title ?? '',
+  department:      '',
+  office_phone:    '',
+  whatsapp_mobile: b.whatsapp ?? '',
+  email:           b.email ?? '',
+  incharge:        [],
+  purpose:         'billing',
 });
 
 /** Holiday entry → ClientFestival columns. */
@@ -220,17 +246,20 @@ export const contactFormToPayload = (f = {}) => ({
   contact_preference: f.pref ?? '',
   location:           f.loc ?? '',
   incharge:           Array.isArray(f.charges) ? f.charges : [],
-  is_primary:         0,
+  purpose:            'lead',
 });
 
 /** Bundle all three edited sections into the saveClientDetails payload. */
-export const buildDetailsPayload = ({ info, leads, holidays } = {}) => {
+export const buildDetailsPayload = ({ info, leads, holidays, billingContact } = {}) => {
   const c = info?.company ?? {};
   const x = info?.contact ?? {};
-  // The primary contact is saved as a contact row (is_primary = 1), alongside
-  // the dept leads (is_primary = 0). Skip it only if completely empty.
+  // Contacts are saved as rows by purpose: 'primary' (Company Info card),
+  // 'billing' (Billing tab), and 'lead' (Dept Leads). Primary/billing are
+  // skipped if completely empty.
   const primary = primaryToContact(x);
   const hasPrimary = (primary.name && primary.name.trim()) || (primary.email && primary.email.trim());
+  const billing = billingToContact(billingContact ?? {});
+  const hasBilling = (billing.name && billing.name.trim()) || (billing.email && billing.email.trim());
   return {
     company_name:     c.name ?? '',
     company_address:  c.address ?? '',
@@ -246,6 +275,7 @@ export const buildDetailsPayload = ({ info, leads, holidays } = {}) => {
     branch_countries:  holidays?.branchCountries ?? [],
     contacts:  [
       ...(hasPrimary ? [primary] : []),
+      ...(hasBilling ? [billing] : []),
       ...(leads ?? []).map(leadToContact),
     ],
     festivals: [...(holidays?.earlyOff ?? []), ...(holidays?.customs ?? [])].map(holidayToFestival),
