@@ -8,24 +8,40 @@ import Avatar from '../../components/Avatar/Avatar.jsx';
 import DataTable from '../../components/DataTable/DataTable.jsx';
 import SearchFilterBar from '../../components/SearchFilterBar/SearchFilterBar.jsx';
 import EmployeeCard from '../../components/EmployeeCard/EmployeeCard.jsx';
-import { employeeService } from '../../services/employeeService.js';
-import { DEPARTMENTS, EMP_STATUSES } from '../../data/employees.js';
+import { employeeService, EMP_STATUSES } from '../../services/employeeService.js';
+import { DEPARTMENTS } from '../../data/employees.js';
 import useFilteredList from '../../hooks/useFilteredList.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { ROUTES } from '../../utils/constants.js';
 import './EmployeesPage.css';
 
-const STATUS_TONE = { Active: 'grn', Probation: 'amb', Resigned: 'red', 'On Leave': 'blu' };
+const STATUS_TONE = {
+  Active: 'grn',
+  'Probation Period': 'pur',
+  'Going Onboard': 'blu',
+  'Notice Period': 'amb',
+  'Ex-employee': 'red',
+  Terminated: 'red',
+  Inactive: 'gry',
+};
 
 export default function EmployeesPage() {
   useDocumentTitle('Employees');
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [dept, setDept]     = useState('All');
   const [status, setStatus] = useState('All');
 
   useEffect(() => {
-    employeeService.list().then(setItems);
+    let alive = true;
+    employeeService
+      .list()
+      .then((rows) => { if (alive) setItems(rows); })
+      .catch((err) => { if (alive) setError(err?.message || 'Failed to load employees.'); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
   }, []);
 
   const filtered = useFilteredList(items, {
@@ -84,13 +100,21 @@ export default function EmployeesPage() {
           onClear={() => { setSearch(''); setDept('All'); setStatus('All'); }}
         />
 
-        <div className="emp-desk-table">
-          <DataTable columns={columns} rows={filtered} emptyText="No employees match the filters." />
-        </div>
+        {loading ? (
+          <div style={{ padding: 24, color: 'var(--c-text-soft)' }}>Loading employees…</div>
+        ) : error ? (
+          <div style={{ padding: 24, color: 'var(--c-danger)' }}>{error}</div>
+        ) : (
+          <>
+            <div className="emp-desk-table">
+              <DataTable columns={columns} rows={filtered} emptyText="No employees match the filters." />
+            </div>
 
-        <div className="emp-mob-list">
-          {filtered.map((e) => <EmployeeCard key={e.id} employee={e} />)}
-        </div>
+            <div className="emp-mob-list">
+              {filtered.map((e) => <EmployeeCard key={e.id} employee={e} />)}
+            </div>
+          </>
+        )}
       </Card>
     </>
   );

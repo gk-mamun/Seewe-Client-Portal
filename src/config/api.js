@@ -40,4 +40,7 @@ export const API_ENDPOINTS = {
   CLIENT_SAVE_CONTACT:   '/client/save-client-contact',   // POST a single new contact
   CLIENT_DELETE_CONTACT: '/client/delete-client-contact', // POST { id } to delete one contact
   CLIENT_SAVE_AGREEMENT: '/client/save-client-agreement', // POST multipart { agreement: file }
+
+  // ─── Employees ─────────────────────────────────────────────────
+  CLIENT_GET_EMPLOYEES: '/client/get-employees',   // GET employees under this client (append /{id} for one)
 };
