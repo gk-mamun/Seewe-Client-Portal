@@ -56,7 +56,7 @@ export default function EmployeesPage() {
       header: 'Employee',
       render: (r) => (
         <Link to={`/employees/${r.id}`} className="emp-cell">
-          <Avatar initials={r.initials} color={r.color} size={32} />
+          <Avatar initials={r.initials} color={r.color} photo={r.photo} alt={r.name} size={32} />
           <div>
             <div style={{ fontWeight: 600 }}>{r.name}</div>
             <div style={{ fontSize: 11, color: 'var(--c-text-soft)' }}>{r.email}</div>

@@ -12,6 +12,8 @@ export default function EmployeeCard({ employee }) {
       <Avatar
         initials={employee.initials}
         color={employee.color}
+        photo={employee.photo}
+        alt={employee.name}
         size={52}
         className="emp-mob-av"
       />

@@ -27,6 +27,15 @@ export default function InfoTab({ employee }) {
     { label: 'Arrangement', value: employee.arrangement },
     { label: 'Break Time',  value: employee.breakTime },
   ];
+  const bank = employee.bank || {};
+  const bankItems = [
+    { label: 'Bank',         value: bank.name },
+    { label: 'Account Name', value: bank.accountName },
+    { label: 'Account No.',  value: bank.accountNo },
+    { label: 'Branch',       value: bank.branch },
+    { label: 'SWIFT',        value: bank.swift },
+  ];
+  const hasBank = bankItems.some((i) => i.value);
 
   return (
     <>
@@ -36,6 +45,12 @@ export default function InfoTab({ employee }) {
       <InfoGrid items={employment} />
       <div className="section-hd">Working Schedule</div>
       <InfoGrid items={schedule} />
+      {hasBank && (
+        <>
+          <div className="section-hd">Bank Details</div>
+          <InfoGrid items={bankItems} />
+        </>
+      )}
     </>
   );
 }

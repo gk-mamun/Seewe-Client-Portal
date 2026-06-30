@@ -3,7 +3,7 @@
    defensively and mapped via toEmployeeRow. */
 
 import { api } from './apiClient.js';
-import { API_ENDPOINTS } from '../config/api.js';
+import { API_ENDPOINTS, assetUrl } from '../config/api.js';
 
 /** Backend status code → label. */
 export const EMPLOYEE_STATUS = {
@@ -57,6 +57,7 @@ export const toEmployeeRow = (e = {}) => {
     status:   EMPLOYEE_STATUS[e.status] ?? (e.status ?? ''),
     initials: initialsOf(name),
     color:    colorOf(e.id ?? name),
+    photo:    (e.photoname || e.photo_name || e.photo) ? assetUrl(e.photoname || e.photo_name || e.photo) : '',
   };
 };
 
@@ -87,25 +88,39 @@ const deriveSchedule = (wd = {}) => {
  *  Reads field names from the real response; anything not provided stays blank
  *  so the profile shows only the data that's actually available. */
 export const toEmployeeDetail = (e = {}) => {
-  const emp = e.employment_detail ?? e.userEmploymentDetail ?? {};
-  const wd = e.working_day ?? e.staffWorkingDay ?? {};
+  // toArray() serialises relations as snake_case of the method name, e.g.
+  // userEmploymentDetail → user_employment_detail. Keep old keys as fallbacks.
+  const emp = e.user_employment_detail ?? e.employment_detail ?? e.userEmploymentDetail ?? {};
+  const wd = e.staff_working_day ?? e.working_day ?? e.staffWorkingDay ?? {};
+  const basic = e.user_basic_detail ?? e.userBasicDetail ?? {};
+  const bank = e.user_bank_detail ?? e.userBankDetail ?? {};
   const schedule = deriveSchedule(wd);
   const row = toEmployeeRow({
     ...e,
     position: e.position ?? emp.position,
     department: e.department ?? emp.department,
   });
+  const photoPath = basic.photoname || basic.photo_name || e.photoname || e.photo_name || basic.photo || e.photo || '';
   return {
     ...row,
+    photo:       photoPath ? assetUrl(photoPath) : '',
     username:    e.username ?? '',
     phone:       e.mobilenumber ?? e.phone ?? '',
-    // Personal fields aren't in this response — left blank.
-    ic:          e.ic ?? '',
-    passport:    e.passport ?? '',
-    dob:         e.dob ?? '',
-    nationality: e.nationality ?? '',
-    gender:      e.gender ?? '',
-    addr:        e.address ?? '',
+    // Personal fields from userBasicDetail (names read defensively).
+    ic:          basic.ic ?? basic.nric ?? basic.ic_number ?? basic.identity_card_no ?? '',
+    passport:    basic.passport ?? basic.passport_no ?? basic.passport_number ?? '',
+    dob:         cleanDate(basic.dob ?? basic.date_of_birth ?? basic.birth_date),
+    nationality: basic.nationality ?? '',
+    gender:      basic.gender ?? basic.sex ?? '',
+    addr:        basic.permanent_address ?? basic.address ?? basic.addr ?? basic.residential_address ?? basic.current_address ?? '',
+    // Bank details from userBankDetail (names read defensively).
+    bank: {
+      name:        bank.bank_name ?? bank.bank ?? '',
+      accountName: bank.account_name ?? bank.account_holder ?? bank.holder_name ?? '',
+      accountNo:   bank.account_number ?? bank.account_no ?? bank.acc_no ?? '',
+      branch:      bank.branch ?? bank.bank_branch ?? '',
+      swift:       bank.swift ?? bank.swift_code ?? '',
+    },
     // Employment detail relation.
     startDate:   cleanDate(emp.join_date || emp.on_board),
     contract:    emp.type_of_employment ?? '',
@@ -132,6 +147,8 @@ export const toEmployeeDetail = (e = {}) => {
     jobsheet:    Array.isArray(e.jobsheet) ? e.jobsheet : [],
     employmentDetail: emp,
     workingDay: wd,
+    basicDetail: basic,
+    bankDetail: bank,
   };
 };
 
