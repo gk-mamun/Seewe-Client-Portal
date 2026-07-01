@@ -142,9 +142,13 @@ export const toEmployeeDetail = (e = {}) => {
     eor:         0,
     total:       num(emp.total_payment),
     leave:       e.leave ?? {},
+    leaveApplications: Array.isArray(e.leave_applications ?? e.leaveApplications)
+      ? (e.leave_applications ?? e.leaveApplications)
+      : [],
     devices:     Array.isArray(e.devices) ? e.devices : [],
     attendance:  Array.isArray(e.attendance) ? e.attendance : [],
     jobsheet:    Array.isArray(e.jobsheet) ? e.jobsheet : [],
+    claims:      Array.isArray(e.claims) ? e.claims : [],
     employmentDetail: emp,
     workingDay: wd,
     basicDetail: basic,

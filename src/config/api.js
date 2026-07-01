@@ -13,11 +13,13 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'https://teamdev.seewework.com/api';
 
 /**
- * Origin that serves uploaded files (same host as the API, minus the
- * trailing `/api`). Stored paths like `storage/app/public/clients/x.jpg`
- * are served from here.
+ * Origin that serves uploaded files (photos, certificates, agreements).
+ * Set VITE_ASSET_BASE_URL to override it independently of the API — handy for
+ * local testing where the API runs locally but the files live on the server.
+ * Defaults to the API host minus the trailing `/api`.
  */
-export const ASSET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
+export const ASSET_BASE_URL =
+  import.meta.env.VITE_ASSET_BASE_URL || API_BASE_URL.replace(/\/api\/?$/, '');
 
 /** Turn a backend-stored file path into an absolute, openable URL. */
 export const assetUrl = (path) => {

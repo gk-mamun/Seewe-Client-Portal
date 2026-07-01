@@ -1,14 +1,23 @@
 import DataTable from '../../../components/DataTable/DataTable.jsx';
 
+const fmtDate = (v) => String(v ?? '').slice(0, 10); // strip any time portion
+
 export default function DevicesTab({ employee }) {
+  const rows = (employee?.devices ?? []).map((d = {}, i) => ({
+    id: d.id ?? i,
+    item: d.item ?? '',
+    type: d.type ?? '',
+    model: d.model ?? '',
+    special_status: d.special_status ?? '',
+    date: fmtDate(d.date),
+  }));
+
   const cols = [
-    { key: 'type',      header: 'Type' },
-    { key: 'brand',     header: 'Brand' },
-    { key: 'model',     header: 'Model' },
-    { key: 'serial',    header: 'Serial' },
-    { key: 'asset',     header: 'Asset ID' },
-    { key: 'issued',    header: 'Issued' },
-    { key: 'condition', header: 'Condition' },
+    { key: 'item',           header: 'Item' },
+    { key: 'type',           header: 'Type' },
+    { key: 'model',          header: 'Model' },
+    { key: 'special_status', header: 'Special Status' },
+    { key: 'date',           header: 'Date' },
   ];
 
   return (
@@ -16,8 +25,8 @@ export default function DevicesTab({ employee }) {
       <div className="section-hd">Assigned Devices</div>
       <DataTable
         columns={cols}
-        rows={employee.devices || []}
-        getRowKey={(r) => r.asset || r.serial}
+        rows={rows}
+        getRowKey={(r) => r.id}
         emptyText="No devices assigned."
         landscape
       />
