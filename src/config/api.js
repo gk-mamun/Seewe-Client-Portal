@@ -45,4 +45,8 @@ export const API_ENDPOINTS = {
 
   // ─── Employees ─────────────────────────────────────────────────
   CLIENT_GET_EMPLOYEES: '/client/get-employees',   // GET employees under this client (append /{id} for one)
+
+  // ─── Leave ─────────────────────────────────────────────────────
+  CLIENT_LEAVE_APPLICATIONS: '/client/leave-applications',  // GET leaves grouped by status
+  CLIENT_UPDATE_LEAVE_STATUS: '/client/update-leave-status', // POST { id, status } approve/reject
 };

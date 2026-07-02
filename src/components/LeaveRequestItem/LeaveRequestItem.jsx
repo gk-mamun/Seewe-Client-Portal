@@ -9,7 +9,7 @@ export default function LeaveRequestItem({ request, onApprove, onReject }) {
   const isPending = request.status === 'Pending';
   return (
     <div className="leave-req-item">
-      <Avatar initials={request.initials} color={request.color} size={36} />
+      <Avatar initials={request.initials} color={request.color} photo={request.photo} alt={request.name} size={36} />
       <div className="leave-req-info">
         <div className="leave-req-name">{request.name}</div>
         <div className="leave-req-detail">
