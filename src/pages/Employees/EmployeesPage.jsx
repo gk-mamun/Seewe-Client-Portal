@@ -9,10 +9,10 @@ import DataTable from '../../components/DataTable/DataTable.jsx';
 import SearchFilterBar from '../../components/SearchFilterBar/SearchFilterBar.jsx';
 import EmployeeCard from '../../components/EmployeeCard/EmployeeCard.jsx';
 import { employeeService, EMP_STATUSES } from '../../services/employeeService.js';
-import { DEPARTMENTS } from '../../data/employees.js';
 import useFilteredList from '../../hooks/useFilteredList.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { ROUTES } from '../../utils/constants.js';
+import { formatHKD } from '../../utils/format.js';
 import './EmployeesPage.css';
 
 const STATUS_TONE = {
@@ -25,13 +25,29 @@ const STATUS_TONE = {
   Inactive: 'gry',
 };
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "2025-02-01" → "Feb 1, 2025"; blank / "0000-00-00" → "". */
+const fmtDate = (v) => {
+  const [y, m, d] = String(v || '').slice(0, 10).split('-').map(Number);
+  return y && m && d ? `${MONTHS[m - 1]} ${d}, ${y}` : '';
+};
+
+const ProbationCell = ({ value }) => {
+  if (value === 'Completed') {
+    return <span style={{ color: 'var(--c-success)', fontWeight: 600 }}>✓ Completed</span>;
+  }
+  if (value === 'In Progress') {
+    return <span style={{ color: 'var(--c-warning)', fontWeight: 600 }}>⏳ In Progress</span>;
+  }
+  return '—';
+};
+
 export default function EmployeesPage() {
   useDocumentTitle('Employees');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [dept, setDept]     = useState('All');
   const [status, setStatus] = useState('All');
 
   useEffect(() => {
@@ -46,7 +62,7 @@ export default function EmployeesPage() {
 
   const filtered = useFilteredList(items, {
     search,
-    filters: { dept, status },
+    filters: { status },
     searchFields: ['name', 'email', 'pos'],
   });
 
@@ -64,14 +80,27 @@ export default function EmployeesPage() {
         </Link>
       ),
     },
-    { key: 'pos',    header: 'Position' },
-    { key: 'dept',   header: 'Department' },
-    { key: 'status', header: 'Status', render: (r) => <Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge> },
+    { key: 'pos', header: 'Position' },
+    {
+      key: 'contractPeriod',
+      header: 'Contract Period',
+      render: (r) =>
+        r.contractPeriod
+          ? <Badge tone={/contract/i.test(r.contractPeriod) ? 'blu' : 'grn'}>{r.contractPeriod}</Badge>
+          : '—',
+    },
+    { key: 'baseSalary', header: 'Base Salary', render: (r) => formatHKD(r.baseSalary) },
+    { key: 'allowance',  header: 'Allowance',   render: (r) => formatHKD(r.allowance) },
+    { key: 'mpf',        header: 'Employer MPF (Est)', render: (r) => formatHKD(r.mpf) },
+    { key: 'joinDate',   header: 'Join Date',   render: (r) => fmtDate(r.joinDate) || '—' },
+    { key: 'probation',  header: 'Probation',   render: (r) => <ProbationCell value={r.probation} /> },
+    { key: 'lastDay',    header: 'Last Day',    render: (r) => fmtDate(r.lastDay) || '—' },
+    { key: 'status',     header: 'Status',      render: (r) => <Badge tone={STATUS_TONE[r.status] || 'gry'}>{r.status}</Badge> },
     {
       key: 'actions',
-      header: '',
+      header: 'Action',
       render: (r) => (
-        <Link to={`/employees/${r.id}`} className="btn bol">View</Link>
+        <Link to={`/employees/${r.id}`} className="btn bol">View →</Link>
       ),
     },
   ];
@@ -91,13 +120,12 @@ export default function EmployeesPage() {
         <SearchFilterBar
           search={search}
           onSearchChange={setSearch}
-          placeholder="Search name, email, position…"
+          placeholder="Search name, position, department…"
           filters={[
-            { name: 'dept',   value: dept,   options: DEPARTMENTS,  onChange: setDept,   label: 'Dept' },
             { name: 'status', value: status, options: EMP_STATUSES, onChange: setStatus, label: 'Status' },
           ]}
-          count={`${filtered.length} of ${items.length}`}
-          onClear={() => { setSearch(''); setDept('All'); setStatus('All'); }}
+          count={`${filtered.length} / ${items.length}`}
+          onClear={() => { setSearch(''); setStatus('All'); }}
         />
 
         {loading ? (
@@ -107,7 +135,7 @@ export default function EmployeesPage() {
         ) : (
           <>
             <div className="emp-desk-table">
-              <DataTable columns={columns} rows={filtered} emptyText="No employees match the filters." />
+              <DataTable columns={columns} rows={filtered} emptyText="No employees match the filters." landscape />
             </div>
 
             <div className="emp-mob-list">

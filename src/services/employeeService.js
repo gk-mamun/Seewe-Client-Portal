@@ -48,6 +48,7 @@ export const toEmployeeRow = (e = {}) => {
     [e.first_name, e.last_name].filter(Boolean).join(' ') ||
     e.full_name ||
     '';
+  const base = Number(e.basic_salary || 0);
   return {
     id:       e.id,
     name,
@@ -58,6 +59,15 @@ export const toEmployeeRow = (e = {}) => {
     initials: initialsOf(name),
     color:    colorOf(e.id ?? name),
     photo:    (e.photoname || e.photo_name || e.photo) ? assetUrl(e.photoname || e.photo_name || e.photo) : '',
+    // Employees-table columns
+    contractPeriod: e.contract_period ?? '',
+    baseSalary:     base,
+    allowance:      Number(e.allowance_1 || 0),
+    // HK employer MPF estimate: 5% of basic, capped at HKD 1,500.
+    mpf:            Math.min(Math.round(base * 0.05), 1500),
+    joinDate:       e.joined_date ?? '',
+    probation:      e.probation ?? '',   // 'Completed' | 'In Progress'
+    lastDay:        e.last_day ?? '',
   };
 };
 
@@ -104,11 +114,15 @@ export const toEmployeeDetail = (e = {}) => {
   return {
     ...row,
     photo:       photoPath ? assetUrl(photoPath) : '',
-    username:    e.username ?? '',
-    phone:       e.mobilenumber ?? e.phone ?? '',
+    username:      e.username ?? '',
+    firstName:     e.first_name ?? '',
+    lastName:      e.last_name ?? '',
+    otherName:     e.other_name ?? '',      // shown as "Display Name"
+    nameInChinese: e.name_in_chinese ?? '',
+    phone:         e.mobilenumber ?? e.phone ?? '',
     // Personal fields from userBasicDetail (names read defensively).
-    ic:          basic.ic ?? basic.nric ?? basic.ic_number ?? basic.identity_card_no ?? '',
-    passport:    basic.passport ?? basic.passport_no ?? basic.passport_number ?? '',
+    ic:          basic.nric_passport_no ?? basic.ic ?? basic.nric ?? '',
+    nricPassportFile: basic.nric_passport_no_file ? assetUrl(basic.nric_passport_no_file) : '',
     dob:         cleanDate(basic.dob ?? basic.date_of_birth ?? basic.birth_date),
     nationality: basic.nationality ?? '',
     gender:      basic.gender ?? basic.sex ?? '',

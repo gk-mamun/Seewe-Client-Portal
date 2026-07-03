@@ -2,10 +2,22 @@ import InfoGrid from '../../../components/InfoGrid/InfoGrid.jsx';
 
 export default function InfoTab({ employee }) {
   const personal = [
+    { label: 'First Name',    value: employee.firstName },
+    { label: 'Last Name',     value: employee.lastName },
+    { label: 'Display Name',  value: employee.otherName },
+    { label: 'Name (Chinese)',value: employee.nameInChinese },
     { label: 'Email',        value: employee.email },
     { label: 'Phone',        value: employee.phone },
     { label: 'IC / NRIC',    value: employee.ic },
-    { label: 'Passport',     value: employee.passport },
+    {
+      label: 'NRIC / Passport',
+      value: employee.nricPassportFile ? (
+        <a href={employee.nricPassportFile} target="_blank" rel="noopener noreferrer"
+          style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>
+          View
+        </a>
+      ) : '',
+    },
     { label: 'Date of Birth',value: employee.dob },
     { label: 'Nationality',  value: employee.nationality },
     { label: 'Gender',       value: employee.gender },

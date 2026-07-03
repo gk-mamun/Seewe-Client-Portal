@@ -3,7 +3,15 @@ import Avatar from '../Avatar/Avatar.jsx';
 import Badge from '../Badge/Badge.jsx';
 import './EmployeeCard.css';
 
-const STATUS_TONE = { Active: 'grn', Probation: 'amb', Resigned: 'red', 'On Leave': 'blu' };
+const STATUS_TONE = {
+  Active: 'grn',
+  'Probation Period': 'pur',
+  'Going Onboard': 'blu',
+  'Notice Period': 'amb',
+  'Ex-employee': 'red',
+  Terminated: 'red',
+  Inactive: 'gry',
+};
 
 /** Card view of an employee — used in mobile lists and as a fallback view. */
 export default function EmployeeCard({ employee }) {
@@ -21,7 +29,6 @@ export default function EmployeeCard({ employee }) {
         <div className="emp-mob-name">{employee.name}</div>
         <div className="emp-mob-pos">{employee.pos}</div>
         <div className="emp-mob-dept">
-          {employee.dept}
           <Badge tone={STATUS_TONE[employee.status] || 'gry'}>{employee.status}</Badge>
         </div>
       </div>
