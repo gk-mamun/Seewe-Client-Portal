@@ -49,4 +49,7 @@ export const API_ENDPOINTS = {
   // ─── Leave ─────────────────────────────────────────────────────
   CLIENT_LEAVE_APPLICATIONS: '/client/leave-applications',  // GET leaves grouped by status
   CLIENT_UPDATE_LEAVE_STATUS: '/client/update-leave-status', // POST { id, status } approve/reject
+
+  // ─── Claims ────────────────────────────────────────────────────
+  CLIENT_GET_CLAIMS: '/client/get-claims',   // GET summary + claims grouped by status
 };

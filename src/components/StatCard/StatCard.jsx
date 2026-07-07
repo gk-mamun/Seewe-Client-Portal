@@ -11,7 +11,9 @@ export default function StatCard({ label, value, change, changeType = 'neu' }) {
   );
 }
 
-/** Container that lays a list of stat tiles into the responsive grid. */
-export function StatGrid({ children }) {
-  return <div className="stat-grid">{children}</div>;
+/** Container that lays a list of stat tiles into the grid.
+ *  `cols` overrides the default 4-column layout. */
+export function StatGrid({ children, cols }) {
+  const style = cols ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : undefined;
+  return <div className="stat-grid" style={style}>{children}</div>;
 }
