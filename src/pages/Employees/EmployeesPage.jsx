@@ -122,7 +122,7 @@ export default function EmployeesPage() {
           onSearchChange={setSearch}
           placeholder="Search name, position, department…"
           filters={[
-            { name: 'status', value: status, options: EMP_STATUSES, onChange: setStatus, label: 'Status' },
+            { name: 'status', value: status, options: EMP_STATUSES, onChange: setStatus },
           ]}
           count={`${filtered.length} / ${items.length}`}
           onClear={() => { setSearch(''); setStatus('All'); }}
