@@ -52,4 +52,5 @@ export const API_ENDPOINTS = {
 
   // ─── Claims ────────────────────────────────────────────────────
   CLIENT_GET_CLAIMS: '/client/get-claims',   // GET summary + claims grouped by status
+  CLIENT_UPDATE_CLAIM_STATUS: '/client/update-claim-status', // POST { id, status }; returns summary
 };

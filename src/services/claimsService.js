@@ -43,8 +43,16 @@ const mapClaim = (c = {}, group) => ({
 });
 
 let cache = [];
-let summary = { total_amount: 0, total_pending: 0, total_approved: 0, total_rejected: 0 };
+let summary = { total_amount: 0, total_pending: 0, total_approved: 0, total_paid: 0, total_rejected: 0 };
 let loaded = false;
+
+// Pub/sub so the sidebar claims badge reacts to status changes without refetch.
+const listeners = new Set();
+const pendingCountOf = () => cache.filter((c) => c.status === 'Pending').length;
+const emit = () => {
+  const n = pendingCountOf();
+  listeners.forEach((fn) => fn(n));
+};
 
 const fetchClaims = async () => {
   const res = await api.get(API_ENDPOINTS.CLIENT_GET_CLAIMS);
@@ -56,6 +64,7 @@ const fetchClaims = async () => {
   });
   cache = all;
   loaded = true;
+  emit();
   return all;
 };
 
@@ -65,14 +74,27 @@ export const claimsService = {
   /** Amount totals from the backend summary. */
   getSummary: () => summary,
 
-  // No approve/reject endpoint yet — update the local cache optimistically.
+  /**
+   * Update a claim's status. `status` is the display label ('Approved' /
+   * 'Rejected'), which matches the backend's accepted values. POSTs
+   * { id, status }, then updates the cache and the summary from the response.
+   */
   setStatus: async (id, status) => {
+    const res = await api.post(API_ENDPOINTS.CLIENT_UPDATE_CLAIM_STATUS, { id, status });
     cache = cache.map((c) => (c.id === id ? { ...c, status } : c));
+    if (res?.summary) summary = res.summary;
+    emit();
     return cache;
   },
 
   pendingCount: async () => {
     if (!loaded) await fetchClaims();
-    return cache.filter((c) => c.status === 'Pending').length;
+    return pendingCountOf();
+  },
+
+  /** Subscribe to pending-count changes; returns an unsubscribe fn. */
+  subscribePending: (fn) => {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
   },
 };

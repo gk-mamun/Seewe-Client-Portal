@@ -36,6 +36,8 @@ export default function ClaimsPage() {
   const [tab, setTab] = useState('pending');
   const [search, setSearch] = useState('');
   const [type, setType] = useState('All');
+  const [toast, setToast] = useState(null); // { msg, tone }
+  const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -57,9 +59,23 @@ export default function ClaimsPage() {
     { search, filters: { type }, searchFields: ['name', 'email', 'type'] }
   );
 
-  // Optimistic local update for now — backend endpoint to be wired later.
-  const setStatus = (id, status) =>
-    claimsService.setStatus(id, status).then((next) => setItems([...next]));
+  const act = async (id, status) => {
+    if (busyId) return;
+    setBusyId(id);
+    setToast({ msg: `Updating claim to ${status}…`, tone: 'info' });
+    try {
+      const next = await claimsService.setStatus(id, status);
+      setItems([...next]);
+      setSummary(claimsService.getSummary()); // stats come back with the response
+      setToast({ msg: `Claim ${status.toLowerCase()}.`, tone: 'success' });
+      setTimeout(() => setToast(null), 2500);
+    } catch (err) {
+      setToast({ msg: err?.message || 'Could not update the claim.', tone: 'error' });
+      setTimeout(() => setToast(null), 4000);
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const cols = [
     {
@@ -85,8 +101,8 @@ export default function ClaimsPage() {
       render: (r) =>
         r.status === 'Pending' ? (
           <div style={{ display: 'flex', gap: 6 }}>
-            <Button variant="success" onClick={() => setStatus(r.id, 'Approved')}>Approve</Button>
-            <Button variant="danger"  onClick={() => setStatus(r.id, 'Rejected')}>Reject</Button>
+            <Button variant="success" disabled={busyId === r.id} onClick={() => act(r.id, 'Approved')}>Approve</Button>
+            <Button variant="danger"  disabled={busyId === r.id} onClick={() => act(r.id, 'Rejected')}>Reject</Button>
           </div>
         ) : '—',
     },
@@ -125,6 +141,34 @@ export default function ClaimsPage() {
           <DataTable columns={cols} rows={filtered} emptyText="No claims in this view." />
         )}
       </Card>
+
+      {toast && <ClaimToast msg={toast.msg} tone={toast.tone} />}
     </>
+  );
+}
+
+const TOAST_STYLE = {
+  info:    { bg: 'var(--c-info-bg)',    border: 'var(--c-info-border)',    color: 'var(--c-info)' },
+  success: { bg: 'var(--c-success-bg)', border: 'var(--c-success-border)', color: 'var(--c-success)' },
+  error:   { bg: 'var(--c-danger-bg)',  border: 'var(--c-danger-border)',  color: 'var(--c-danger-dark)' },
+};
+
+function ClaimToast({ msg, tone = 'info' }) {
+  const s = TOAST_STYLE[tone] || TOAST_STYLE.info;
+  return (
+    <div
+      role="status"
+      style={{
+        position: 'fixed', left: 20, bottom: 20, zIndex: 2000,
+        padding: '12px 16px', minWidth: 220, maxWidth: 360,
+        background: s.bg, border: `1px solid ${s.border}`, color: s.color,
+        borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 600,
+        boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}
+    >
+      {tone === 'info' && <span aria-hidden="true">⏳</span>}
+      {msg}
+    </div>
   );
 }

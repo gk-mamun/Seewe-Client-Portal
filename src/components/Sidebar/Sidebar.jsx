@@ -22,9 +22,12 @@ export default function Sidebar() {
     );
   }, [isCompanyComplete]);
 
-  // Live-update the leave badge when a leave is approved/rejected elsewhere.
+  // Live-update the badges when a leave/claim is approved/rejected elsewhere.
   useEffect(() => leaveService.subscribePending(
     (n) => setBadges((b) => ({ ...b, 'pending-leave': n }))
+  ), []);
+  useEffect(() => claimsService.subscribePending(
+    (n) => setBadges((b) => ({ ...b, 'pending-claim': n }))
   ), []);
 
   const handleLogout = async () => {
