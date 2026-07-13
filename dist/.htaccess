@@ -1,0 +1,26 @@
+# SPA fallback for the SeeWe Work Client Portal (React Router).
+# Serves index.html for any path that isn't a real file/folder so that
+# deep links (e.g. /employees/33) and page refreshes don't 404.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Don't rewrite requests for existing files or directories.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else → index.html (client-side routing takes over).
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Let the browser cache hashed assets aggressively; never cache index.html.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(?:js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "^(index\.html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
