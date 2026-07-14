@@ -20,7 +20,7 @@ export default function LeaveApprovalsCard({ items, max = 3 }) {
         <>
           {visible.map((a) => (
             <div key={a.id} className="appr-row">
-              <Avatar initials={a.initials} color={a.color} size={36} />
+              <Avatar initials={a.initials} color={a.color} photo={a.photo} alt={a.name} size={36} />
               <div className="appr-info">
                 <div className="appr-title">
                   {a.name} <span style={{ color: 'var(--c-text-soft)', fontWeight: 400 }}>— {a.type}</span>

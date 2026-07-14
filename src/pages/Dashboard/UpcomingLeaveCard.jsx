@@ -16,7 +16,7 @@ export default function UpcomingLeaveCard({ items }) {
       ) : (
         items.slice(0, 5).map((a) => (
           <div key={a.id} className="up-row">
-            <Avatar initials={a.initials} color={a.color} size={30} />
+            <Avatar initials={a.initials} color={a.color} photo={a.photo} alt={a.name} size={30} />
             <div className="up-flex">
               <div className="up-name">{a.name}</div>
               <div className="up-meta">

@@ -23,7 +23,7 @@ export default function ClaimApprovalsCard({ items, max = 4 }) {
             const icon = CLAIM_TYPE_ICONS[c.type] || '💰';
             return (
               <div key={c.id} className="appr-row">
-                <Avatar initials={c.initials} color={c.color} size={36} />
+                <Avatar initials={c.initials} color={c.color} photo={c.photo} alt={c.name} size={36} />
                 <div className="appr-info">
                   <div className="appr-title">
                     {c.name}{' '}
