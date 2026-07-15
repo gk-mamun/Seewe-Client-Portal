@@ -58,13 +58,22 @@ export const dashboardService = {
     const h = d.highlights ?? {};
     const se = d.staff_events ?? {};
 
+    const staffProbation = (se.probation ?? []).map((x) => ({ ...person(x), until: x.until }));
+    const staffResigning = (se.resigning ?? []).map((x) => ({ ...person(x), lastDay: x.last_day }));
+
+    // Prefer the API's last_day_soon; otherwise surface the resigning staff so
+    // the Today Highlights banner still shows upcoming last days.
+    const lastDaySoon = (h.last_day_soon ?? []).length
+      ? h.last_day_soon.map((x) => ({ ...person(x), lastDay: x.last_day }))
+      : staffResigning;
+
     return {
       stats: d.stats ?? {},
 
       highlights: {
         holidays:      (h.today_holidays ?? []).map((x) => ({ name: x.name, tag: x.country, col: tagColor(x.country) })),
         onLeave:       (h.on_leave_today ?? []).map((x) => ({ ...person(x), type: x.type })),
-        resigning:     (h.last_day_soon ?? []).map((x) => ({ ...person(x), lastDay: x.last_day })),
+        resigning:     lastDaySoon,
         actionsNeeded: h.actions_needed ?? 0,
       },
 
@@ -89,8 +98,8 @@ export const dashboardService = {
 
       staffEvents: {
         onboarding: [],
-        probation: (se.probation ?? []).map((x) => ({ ...person(x), until: x.until })),
-        resigning: (se.resigning ?? []).map((x) => ({ ...person(x), lastDay: x.last_day })),
+        probation: staffProbation,
+        resigning: staffResigning,
       },
     };
   },
