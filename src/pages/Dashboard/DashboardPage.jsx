@@ -24,7 +24,12 @@ const EMPTY = {
   upcomingHolidays: [],
   upcomingLeave: [],
   staffEvents: { onboarding: [], probation: [], resigning: [] },
+  attendance: [],
 };
+
+const todayLabel = () =>
+  new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', weekday: 'long' })
+    .replace(/^(\w+) (.+)$/, '$2 ($1)'); // "Monday 1 Jun 2026" → "1 Jun 2026 (Monday)"
 
 export default function DashboardPage() {
   useDocumentTitle('Dashboard');
@@ -43,7 +48,7 @@ export default function DashboardPage() {
     return () => { alive = false; };
   }, []);
 
-  const { stats, highlights, leaveApprovals, claimApprovals, upcomingHolidays, upcomingLeave, staffEvents } = data;
+  const { stats, highlights, leaveApprovals, claimApprovals, upcomingHolidays, upcomingLeave, staffEvents, attendance } = data;
 
   return (
     <>
@@ -93,7 +98,7 @@ export default function DashboardPage() {
             <StaffEventsCard buckets={staffEvents} />
           </div>
 
-          <AttendanceCard />
+          <AttendanceCard rows={attendance} dateLabel={todayLabel()} />
         </>
       )}
     </>

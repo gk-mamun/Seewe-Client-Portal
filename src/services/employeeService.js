@@ -94,6 +94,40 @@ const deriveSchedule = (wd = {}) => {
   return { workDays, workStart: start.trim(), workEnd: end.trim() };
 };
 
+const LEAVE_ICONS = [
+  [/annual|vacation/i, '🧳'],
+  [/sick|medical/i, '🤒'],
+  [/unpaid|no.?pay/i, '📄'],
+  [/hospital/i, '🏥'],
+  [/emergency/i, '🚨'],
+  [/maternity|paternity|parental/i, '👶'],
+  [/compassion|bereave/i, '🕊️'],
+];
+const leaveIcon = (label) => (LEAVE_ICONS.find(([re]) => re.test(label)) || [null, '📅'])[1];
+const titleize = (s) =>
+  String(s || '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+
+/**
+ * Normalise `leavesummary` into entitlement cards. Accepts either an array of
+ * rows or an object keyed by leave type; reads used/total/remaining defensively.
+ */
+export const normalizeLeaveSummary = (s) => {
+  if (!s) return [];
+  const rows = Array.isArray(s)
+    ? s
+    : Object.entries(s).map(([type, v]) => (v && typeof v === 'object' ? { type, ...v } : { type, total: v }));
+  return rows.map((e = {}) => {
+    const label = e.label ?? e.name ?? e.type ?? e.leave_type ?? '';
+    const total = Number(e.total ?? e.entitlement ?? e.entitled ?? e.allowed ?? e.quota ?? 0);
+    const used = Number(e.used ?? e.taken ?? e.applied ?? e.consumed ?? 0);
+    const remaining = e.remaining ?? e.balance ?? e.left ?? (total - used);
+    return { label: titleize(label), icon: leaveIcon(label), used, total, remaining: Number(remaining) || 0 };
+  });
+};
+
 /** One backend employee (single-employee endpoint) → the full profile shape.
  *  Reads field names from the real response; anything not provided stays blank
  *  so the profile shows only the data that's actually available. */
@@ -156,6 +190,7 @@ export const toEmployeeDetail = (e = {}) => {
     eor:         0,
     total:       num(emp.total_payment),
     leave:       e.leave ?? {},
+    leaveSummary: normalizeLeaveSummary(e.leave_entitlements ?? e.leavesummary ?? e.leave_summary),
     leaveApplications: Array.isArray(e.leave_applications ?? e.leaveApplications)
       ? (e.leave_applications ?? e.leaveApplications)
       : [],

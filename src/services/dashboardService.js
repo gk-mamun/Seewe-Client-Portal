@@ -101,6 +101,17 @@ export const dashboardService = {
         probation: staffProbation,
         resigning: staffResigning,
       },
+
+      // Today's clock status.
+      attendance: (d.today_attendance ?? []).map((x) => ({
+        ...person(x),
+        ci:     x.clockin ?? '',
+        bo:     x.breakstart ?? '',   // Break Out
+        bi:     x.breakend ?? '',     // Break Return
+        co:     x.clockout ?? '',
+        total:  x.total_hours ?? '',
+        status: x.status ?? '',
+      })),
     };
   },
 };
