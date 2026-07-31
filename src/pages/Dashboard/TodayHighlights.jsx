@@ -22,8 +22,6 @@ export default function TodayHighlights({
     ...resigning.map((e)  => <PersonTile    key={`r-${e.id ?? e.name}`} tone="resign"      person={e} subLabel={`📅 Last Day: ${e.lastDay}`} />),
   ];
 
-  if (tiles.length === 0) return null;
-
   return (
     <section className="today-highlights">
       <header className="th-hd">
@@ -35,7 +33,13 @@ export default function TodayHighlights({
           </span>
         )}
       </header>
-      <div className="th-tiles">{tiles}</div>
+      <div className="th-tiles">
+        {tiles.length > 0 ? tiles : (
+          <div style={{ padding: '14px 16px', fontSize: 13, color: 'var(--c-text-fade)' }}>
+            Nothing to highlight today.
+          </div>
+        )}
+      </div>
     </section>
   );
 }

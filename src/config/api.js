@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
 
   // ─── Employees ─────────────────────────────────────────────────
   CLIENT_GET_EMPLOYEES: '/client/get-employees',   // GET employees under this client (append /{id} for one)
+  CLIENT_ATTENDANCE_REPORT: '/client/generate-attendance-report', // POST { user_id, month, year } → PDF link
+  CLIENT_EMPLOYEE_JOBSHEET: '/client/employee-jobsheet',          // GET ?user_id&date → tasks for the day
 
   // ─── Leave ─────────────────────────────────────────────────────
   CLIENT_LEAVE_APPLICATIONS: '/client/leave-applications',  // GET leaves grouped by status

@@ -228,4 +228,43 @@ export const employeeService = {
     const list = await fetchEmployees();
     return list.filter((e) => e.status === 'Active').length;
   },
+
+  /**
+   * POST /client/generate-attendance-report → returns a link to a generated
+   * PDF for the given user/month/year. Resolves to an absolute PDF URL (or '').
+   */
+  generateAttendanceReport: async ({ userId, month, year }) => {
+    const res = await api.post(API_ENDPOINTS.CLIENT_ATTENDANCE_REPORT, {
+      user_id: userId,
+      month,
+      year,
+    });
+    // Find the PDF link no matter which key the backend uses.
+    const path =
+      res?.pdf_url ?? res?.pdf ?? res?.url ?? res?.file ?? res?.link ?? res?.report_url ?? res?.data?.pdf_url ??
+      findPdfLink(res);
+    return path ? assetUrl(path) : '';
+  },
+
+  /** GET /client/employee-jobsheet?user_id&date → tasks for a user on a given date. */
+  getJobsheet: async ({ userId, date }) => {
+    const qs = new URLSearchParams({ user_id: userId, date }).toString();
+    const res = await api.get(`${API_ENDPOINTS.CLIENT_EMPLOYEE_JOBSHEET}?${qs}`);
+    const rows = res?.task_logs ?? res?.jobsheet ?? res?.tasks ?? res?.data ?? (Array.isArray(res) ? res : []);
+    return Array.isArray(rows) ? rows : [];
+  },
 };
+
+/** Recursively scan a value for the first string that looks like a PDF link. */
+function findPdfLink(v) {
+  if (typeof v === 'string') return /\.pdf(\?|#|$)/i.test(v) ? v : '';
+  if (Array.isArray(v)) {
+    for (const x of v) { const f = findPdfLink(x); if (f) return f; }
+    return '';
+  }
+  if (v && typeof v === 'object') {
+    for (const x of Object.values(v)) { const f = findPdfLink(x); if (f) return f; }
+    return '';
+  }
+  return '';
+}

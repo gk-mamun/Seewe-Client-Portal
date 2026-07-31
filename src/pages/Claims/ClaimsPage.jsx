@@ -1,24 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader.jsx';
 import Card from '../../components/Card/Card.jsx';
-import PageTabs from '../../components/PageTabs/PageTabs.jsx';
-import DataTable from '../../components/DataTable/DataTable.jsx';
 import Badge from '../../components/Badge/Badge.jsx';
 import Button from '../../components/Button/Button.jsx';
 import Avatar from '../../components/Avatar/Avatar.jsx';
 import SearchFilterBar from '../../components/SearchFilterBar/SearchFilterBar.jsx';
-import StatCard, { StatGrid } from '../../components/StatCard/StatCard.jsx';
 import { claimsService } from '../../services/claimsService.js';
+import { CLAIM_TYPE_ICONS } from '../../data/claims.js';
 import useFilteredList from '../../hooks/useFilteredList.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { formatHKD } from '../../utils/format.js';
+import './ClaimsPage.css';
 
-const STATUS_TONE = { Pending: 'amb', Approved: 'grn', Rejected: 'red' };
+const STATUS_TONE = { Pending: 'amb', Approved: 'grn', Paid: 'blu', Rejected: 'red' };
 
 const TABS = [
-  { key: 'pending',  label: 'Pending Approval' },
-  { key: 'approved', label: 'Approved' },
-  { key: 'rejected', label: 'Rejected' },
+  { key: 'pending',  label: 'Pending Approval', icon: '⏳', note: 'Review and action each request' },
+  { key: 'approved', label: 'Approved',         icon: '✓' },
+  { key: 'rejected', label: 'Rejected',         icon: '✗' },
+  { key: 'all',      label: 'All Claims',       icon: '🧾' },
 ];
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -30,13 +30,15 @@ const fmtDate = (v) => {
 export default function ClaimsPage() {
   useDocumentTitle('Claims');
   const [items, setItems] = useState([]);
-  const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState('pending');
   const [search, setSearch] = useState('');
   const [type, setType] = useState('All');
-  const [toast, setToast] = useState(null); // { msg, tone }
+  const [fYear, setFYear] = useState('All');
+  const [fMonth, setFMonth] = useState('All');
+  const [summary, setSummary] = useState({});
+  const [toast, setToast] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
@@ -54,10 +56,32 @@ export default function ClaimsPage() {
     [items]
   );
 
-  const filtered = useFilteredList(
-    items.filter((c) => c.status.toLowerCase() === tab),
-    { search, filters: { type }, searchFields: ['name', 'email', 'type'] }
+  const counts = useMemo(() => ({
+    pending: items.filter((c) => c.status === 'Pending').length,
+    approved: items.filter((c) => c.status === 'Approved').length,
+    rejected: items.filter((c) => c.status === 'Rejected').length,
+    all: items.length,
+  }), [items]);
+
+  // Year/month filters apply to Approved / Rejected / All (not Pending).
+  const showDateFilter = tab !== 'pending';
+  const years = useMemo(
+    () => Array.from(new Set(items.map((c) => String(c.date).slice(0, 4)).filter((y) => /^\d{4}$/.test(y)))).sort().reverse(),
+    [items]
   );
+
+  const byTab = useMemo(
+    () => (tab === 'all' ? items : items.filter((c) => c.status.toLowerCase() === tab)),
+    [items, tab]
+  );
+  const searched = useFilteredList(byTab, { search, filters: { type }, searchFields: ['name', 'email', 'type', 'desc'] });
+  const filtered = useMemo(() => {
+    if (!showDateFilter) return searched;
+    return searched.filter((c) => {
+      const [y, m] = String(c.date).slice(0, 10).split('-');
+      return (fYear === 'All' || y === fYear) && (fMonth === 'All' || Number(m) === Number(fMonth));
+    });
+  }, [searched, showDateFilter, fYear, fMonth]);
 
   const act = async (id, status) => {
     if (busyId) return;
@@ -66,7 +90,7 @@ export default function ClaimsPage() {
     try {
       const next = await claimsService.setStatus(id, status);
       setItems([...next]);
-      setSummary(claimsService.getSummary()); // stats come back with the response
+      setSummary(claimsService.getSummary());
       setToast({ msg: `Claim ${status.toLowerCase()}.`, tone: 'success' });
       setTimeout(() => setToast(null), 2500);
     } catch (err) {
@@ -77,70 +101,110 @@ export default function ClaimsPage() {
     }
   };
 
-  const cols = [
-    {
-      key: 'name',
-      header: 'Employee',
-      render: (r) => (
-        <div className="emp-cell">
-          <Avatar initials={r.initials} color={r.color} photo={r.photo} alt={r.name} size={32} />
-          <div>
-            <div style={{ fontWeight: 600 }}>{r.name}</div>
-            <div style={{ fontSize: 11, color: 'var(--c-text-soft)' }}>{r.email}</div>
-          </div>
-        </div>
-      ),
-    },
-    { key: 'type',   header: 'Type' },
-    { key: 'amount', header: 'Amount', render: (r) => formatHKD(r.amount) },
-    { key: 'date',   header: 'Date', render: (r) => fmtDate(r.date) },
-    { key: 'status', header: 'Status', render: (r) => <Badge tone={STATUS_TONE[r.status] || 'gry'}>{r.status}</Badge> },
-    {
-      key: 'actions',
-      header: 'Action',
-      render: (r) =>
-        r.status === 'Pending' ? (
-          <div style={{ display: 'flex', gap: 6 }}>
-            <Button variant="success" disabled={busyId === r.id} onClick={() => act(r.id, 'Approved')}>Approve</Button>
-            <Button variant="danger"  disabled={busyId === r.id} onClick={() => act(r.id, 'Rejected')}>Reject</Button>
-          </div>
-        ) : '—',
-    },
-  ];
-
-  const total = Number(summary.total_amount || 0);
+  const activeTab = TABS.find((t) => t.key === tab) || TABS[0];
 
   return (
     <>
       <PageHeader title="Claims" />
 
-      <StatGrid cols={5}>
-        <StatCard label="Pending"  value={formatHKD(summary.total_pending)}  changeType="neu" />
-        <StatCard label="Approved" value={formatHKD(summary.total_approved)} changeType="up" />
-        <StatCard label="Paid"     value={formatHKD(summary.total_paid)}     changeType="up" />
-        <StatCard label="Rejected" value={formatHKD(summary.total_rejected)} changeType="dn" />
-        <StatCard label="Total"    value={formatHKD(total)} />
-      </StatGrid>
+      <div style={{ marginBottom: 16 }}>
+        <Card>
+          <SearchFilterBar
+            search={search}
+            onSearchChange={setSearch}
+            placeholder="Search employee or description…"
+            filters={[{ name: 'type', value: type, options: typeOptions, onChange: setType }]}
+          />
+        </Card>
+      </div>
 
-      <PageTabs tabs={TABS} active={tab} onChange={setTab} />
+      {loading ? (
+        <p style={{ color: 'var(--c-text-soft)' }}>Loading claims…</p>
+      ) : error ? (
+        <p style={{ color: 'var(--c-danger)' }}>{error}</p>
+      ) : (
+        <div className="claims-layout">
+          <nav className="claims-tabs" aria-label="Claim status">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                className={`claims-tab ${tab === t.key ? 'active' : ''}`}
+                onClick={() => setTab(t.key)}
+              >
+                <span aria-hidden="true">{t.icon}</span>
+                <span className="tab-label">{t.label}</span>
+                <span className="tab-count">{counts[t.key]}</span>
+              </button>
+            ))}
+          </nav>
 
-      <Card bodyPadding={false}>
-        <SearchFilterBar
-          search={search}
-          onSearchChange={setSearch}
-          placeholder="Search employee or type…"
-          filters={[{ name: 'type', value: type, options: typeOptions, onChange: setType }]}
-          count={`${filtered.length} claim(s)`}
-          onClear={() => { setSearch(''); setType('All'); }}
-        />
-        {loading ? (
-          <p style={{ padding: 20, color: 'var(--c-text-soft)' }}>Loading claims…</p>
-        ) : error ? (
-          <p style={{ padding: 20, color: 'var(--c-danger)' }}>{error}</p>
-        ) : (
-          <DataTable columns={cols} rows={filtered} emptyText="No claims in this view." />
-        )}
-      </Card>
+          <section className="claims-list">
+            <header className="claims-list-hd">
+              <div className="hd-title">
+                {activeTab.label}
+                <Badge tone="red">{filtered.length}</Badge>
+              </div>
+              {tab === 'pending' ? (
+                activeTab.note && <div className="hd-note">{activeTab.note}</div>
+              ) : (
+                <div className="hd-totals">
+                  <span className="hd-total approved">Approved: {formatHKD(summary.total_approved)}</span>
+                  <span className="hd-total rejected">Rejected: {formatHKD(summary.total_rejected)}</span>
+                </div>
+              )}
+            </header>
+
+            {showDateFilter && (
+              <div className="claim-filters">
+                <select className="claim-filter-sel" value={fYear} onChange={(e) => setFYear(e.target.value)}>
+                  <option value="All">All Years</option>
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+                <select className="claim-filter-sel" value={fMonth} onChange={(e) => setFMonth(e.target.value)}>
+                  <option value="All">All Months</option>
+                  {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                </select>
+              </div>
+            )}
+
+            {filtered.length === 0 ? (
+              <div className="claim-empty">No claims in this view.</div>
+            ) : (
+              filtered.map((c) => (
+                <div key={c.id} className="claim-row">
+                  <Avatar initials={c.initials} color={c.color} photo={c.photo} alt={c.name} size={40} />
+                  <div className="claim-body">
+                    <div className="claim-name">
+                      {c.name} <span className="c-type">— {CLAIM_TYPE_ICONS[c.type] || '💰'} {c.type}</span>
+                    </div>
+                    <div className="claim-meta">
+                      {formatHKD(c.amount)} <span className="c-date">· {fmtDate(c.date)}</span>
+                    </div>
+                    {c.desc && <div className="claim-desc">{c.desc}</div>}
+                    {c.file && (
+                      <a className="claim-file" href={c.file} target="_blank" rel="noopener noreferrer">
+                        📎 {c.fileName || 'Receipt'}
+                      </a>
+                    )}
+                    <div className="claim-sub">Submitted: {fmtDate(c.submitted)}</div>
+                  </div>
+                  <div className="claim-actions">
+                    {c.status === 'Pending' ? (
+                      <>
+                        <Button variant="success" disabled={busyId === c.id} onClick={() => act(c.id, 'Approved')}>✓ Approve</Button>
+                        <Button variant="danger"  disabled={busyId === c.id} onClick={() => act(c.id, 'Rejected')}>✗ Reject</Button>
+                      </>
+                    ) : (
+                      <Badge tone={STATUS_TONE[c.status] || 'gry'}>{c.status}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </section>
+        </div>
+      )}
 
       {toast && <ClaimToast msg={toast.msg} tone={toast.tone} />}
     </>

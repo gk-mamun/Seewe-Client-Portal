@@ -61,11 +61,8 @@ export const dashboardService = {
     const staffProbation = (se.probation ?? []).map((x) => ({ ...person(x), until: x.until }));
     const staffResigning = (se.resigning ?? []).map((x) => ({ ...person(x), lastDay: x.last_day }));
 
-    // Prefer the API's last_day_soon; otherwise surface the resigning staff so
-    // the Today Highlights banner still shows upcoming last days.
-    const lastDaySoon = (h.last_day_soon ?? []).length
-      ? h.last_day_soon.map((x) => ({ ...person(x), lastDay: x.last_day }))
-      : staffResigning;
+    // Last-day tiles come straight from highlights.last_day_soon; if empty, none show.
+    const lastDaySoon = (h.last_day_soon ?? []).map((x) => ({ ...person(x), lastDay: x.last_day }));
 
     return {
       stats: d.stats ?? {},

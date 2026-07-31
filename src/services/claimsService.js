@@ -39,6 +39,10 @@ const mapClaim = (c = {}, group) => ({
   type:     c.type ?? '',
   amount:   Number(c.amount || 0),
   date:     c.date ?? '',
+  submitted: c.submitted_date ?? c.created_at ?? c.date ?? '',
+  desc:     c.description ?? c.desc ?? c.reason ?? c.remarks ?? '',
+  file:     (c.file ?? c.receipt ?? c.attachment) ? assetUrl(c.file ?? c.receipt ?? c.attachment) : '',
+  fileName: String(c.file ?? c.receipt ?? c.attachment ?? '').split('/').pop() || '',
   status:   STATUS_LABEL[group] ?? STATUS_LABEL[String(c.status).toLowerCase()] ?? (c.status ?? 'Pending'),
 });
 
