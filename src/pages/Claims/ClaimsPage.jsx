@@ -21,6 +21,7 @@ const TABS = [
   { key: 'all',      label: 'All Claims',       icon: '🧾' },
 ];
 
+const PAGE_SIZE = 8;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const fmtDate = (v) => {
   const [y, m, d] = String(v ?? '').slice(0, 10).split('-').map(Number);
@@ -40,6 +41,8 @@ export default function ClaimsPage() {
   const [summary, setSummary] = useState({});
   const [toast, setToast] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [tab, search, type, fYear, fMonth]);
 
   useEffect(() => {
     let alive = true;
@@ -82,6 +85,10 @@ export default function ClaimsPage() {
       return (fYear === 'All' || y === fYear) && (fMonth === 'All' || Number(m) === Number(fMonth));
     });
   }, [searched, showDateFilter, fYear, fMonth]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageRows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const act = async (id, status) => {
     if (busyId) return;
@@ -171,7 +178,7 @@ export default function ClaimsPage() {
             {filtered.length === 0 ? (
               <div className="claim-empty">No claims in this view.</div>
             ) : (
-              filtered.map((c) => (
+              pageRows.map((c) => (
                 <div key={c.id} className="claim-row">
                   <Avatar initials={c.initials} color={c.color} photo={c.photo} alt={c.name} size={40} />
                   <div className="claim-body">
@@ -201,6 +208,16 @@ export default function ClaimsPage() {
                   </div>
                 </div>
               ))
+            )}
+
+            {filtered.length > PAGE_SIZE && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '12px 18px', borderTop: '1px solid var(--c-border-soft)' }}>
+                <span style={{ fontSize: 12, color: 'var(--c-text-soft)' }}>
+                  Page {safePage} of {totalPages} · {filtered.length} claim(s)
+                </span>
+                <button type="button" className="btn bol" disabled={safePage <= 1} onClick={() => setPage((p) => p - 1)}>← Prev</button>
+                <button type="button" className="btn bol" disabled={safePage >= totalPages} onClick={() => setPage((p) => p + 1)}>Next →</button>
+              </div>
             )}
           </section>
         </div>
