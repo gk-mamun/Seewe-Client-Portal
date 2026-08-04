@@ -1,0 +1,90 @@
+/* Leave Balance tab — per-employee entitlement table */
+
+/* "Filter by" row (Leave Report approved tab) */
+.lr-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--c-border-soft);
+}
+.lr-filter .lr-label { font-size: 13px; font-weight: 600; color: var(--c-text-soft); }
+.lr-filter select {
+  padding: 7px 10px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+}
+.lr-filter select:focus { border-color: var(--brand-primary); }
+
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  background: var(--c-info-soft-bg);
+  color: var(--brand-primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 12px 14px;
+}
+.lb-table th:first-child { text-align: left; }
+.lb-table td {
+  padding: 14px;
+  border-top: 1px solid var(--c-border-soft);
+  text-align: center;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.lb-table td:first-child { text-align: left; }
+
+.lb-emp { display: flex; align-items: center; gap: 10px; }
+.lb-emp-name { font-weight: 700; color: var(--c-text); }
+.lb-emp-pos { font-size: 12px; color: var(--c-text-soft); }
+
+.lb-total { color: var(--c-text-soft); font-size: 12px; }
+.lb-used  { color: var(--c-text-soft); font-size: 12px; }
+.lb-left  { font-weight: 700; color: var(--c-success); }
+.lb-left .lb-left-lbl { color: var(--c-text-soft); font-weight: 400; }
+
+.lb-more-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.lb-more-btn:hover { border-color: var(--brand-primary); }
+
+.lb-table td.lb-more-cell { background: var(--c-surface-mute); padding: 0; border-top: none; }
+.lb-more-wrap {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+.lb-more-wrap.open { max-height: 480px; opacity: 1; }
+.lb-more-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 14px 18px;
+}
+.lb-more-card {
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  text-align: center;
+}
+.lb-more-label { font-size: 12px; color: var(--c-text-soft); }
+.lb-more-num { font-size: 24px; font-weight: 800; margin: 4px 0; }
+.lb-more-sub { font-size: 12px; color: var(--c-text-soft); }
+
+@media (max-width: 768px) {
+  .lb-more-cards { grid-template-columns: 1fr; }
+}
