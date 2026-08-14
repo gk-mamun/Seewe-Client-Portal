@@ -1,4 +1,4 @@
-import { formatHKD } from '../../utils/format.js';
+import { formatMYR } from '../../utils/format.js';
 import './SalaryBreakdown.css';
 
 /**
@@ -11,7 +11,7 @@ export default function SalaryBreakdown({ items }) {
       {items.map((it) => (
         <div key={it.label} className={`sal-item ${it.isTotal ? 'total' : ''}`}>
           <div className="s-lbl">{it.label}</div>
-          <div className="s-val">{formatHKD(it.value)}</div>
+          <div className="s-val">{formatMYR(it.value)}</div>
         </div>
       ))}
     </div>

@@ -1,5 +1,5 @@
-export const formatHKD = (n) =>
-  `HKD ${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+export const formatMYR = (n) =>
+  `MYR ${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
 export const formatBytes = (b) =>
   b < 1024

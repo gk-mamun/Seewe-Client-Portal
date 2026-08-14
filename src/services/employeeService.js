@@ -63,7 +63,7 @@ export const toEmployeeRow = (e = {}) => {
     contractPeriod: e.contract_period ?? '',
     baseSalary:     base,
     allowance:      Number(e.allowance_1 || 0),
-    // HK employer MPF estimate: 5% of basic, capped at HKD 1,500.
+    // Employer MPF estimate: 5% of basic, capped at MYR 1,500.
     mpf:            Math.min(Math.round(base * 0.05), 1500),
     joinDate:       e.joined_date ?? '',
     probation:      e.probation ?? '',   // 'Completed' | 'In Progress'
@@ -92,6 +92,51 @@ const deriveSchedule = (wd = {}) => {
   const [start = '', end = ''] = range.includes('-') ? range.split('-') : [];
   const workDays = `${cap(working[0])} – ${cap(working[working.length - 1])}`;
   return { workDays, workStart: start.trim(), workEnd: end.trim() };
+};
+
+const WORK_DAYS = [
+  ['monday', 'Monday'], ['tuesday', 'Tuesday'], ['wednesday', 'Wednesday'],
+  ['thursday', 'Thursday'], ['friday', 'Friday'], ['saturday', 'Saturday'], ['sunday', 'Sunday'],
+];
+
+/** "09:00" | "18:00" | "9:00 AM" → "9:00 AM" / "6:00 PM". */
+const to12h = (t) => {
+  const s = String(t ?? '').trim();
+  if (!s) return '';
+  const ap = s.match(/(\d{1,2}):?(\d{2})?\s*([ap]m)/i);
+  if (ap) return `${parseInt(ap[1], 10)}:${ap[2] ?? '00'} ${ap[3].toUpperCase()}`;
+  const m = s.match(/(\d{1,2}):(\d{2})/);
+  if (!m) return s;
+  let h = parseInt(m[1], 10);
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  h %= 12;
+  if (h === 0) h = 12;
+  return `${h}:${m[2]} ${suffix}`;
+};
+
+/** staff_working_day → per-day rows + timezone / break / arrangement. */
+const buildWorkingWeek = (wd = {}, arrangement = '') => {
+  const days = WORK_DAYS.map(([key, label]) => {
+    const raw = String(wd[key] ?? '').trim();
+    const off = !/\d/.test(raw); // a working day has clock times (digits)
+    let start = '';
+    let end = '';
+    if (!off) {
+      const [s = '', e = ''] = raw.includes('-') ? raw.split('-') : [raw, ''];
+      start = to12h(s);
+      end = to12h(e);
+    }
+    return { label, off, start, end, arrangement: off ? '' : arrangement };
+  });
+  const breakTime =
+    wd.break_time ??
+    (wd.break_start && wd.break_end ? `${to12h(wd.break_start)} – ${to12h(wd.break_end)}` : (wd.break ?? ''));
+  return {
+    timezone: wd.timezone ?? wd.time_zone ?? wd.tz ?? '',
+    breakTime,
+    arrangement,
+    days,
+  };
 };
 
 const LEAVE_ICONS = [
@@ -161,6 +206,7 @@ export const toEmployeeDetail = (e = {}) => {
     nationality: basic.nationality ?? '',
     gender:      basic.gender ?? basic.sex ?? '',
     addr:        basic.permanent_address ?? basic.address ?? basic.addr ?? basic.residential_address ?? basic.current_address ?? '',
+    holidayCountry: basic.holiday_country ?? basic.designated_holiday_country ?? e.holiday_country ?? emp.holiday_country ?? '',
     // Bank details from userBankDetail (names read defensively).
     bank: {
       name:        bank.bank_name ?? bank.bank ?? '',
@@ -173,7 +219,12 @@ export const toEmployeeDetail = (e = {}) => {
     startDate:   cleanDate(emp.join_date || emp.on_board),
     contract:    emp.type_of_employment ?? '',
     probation:   cleanDate(emp.probation),
-    reportTo:    '',
+    reportTo:    emp.report_to ?? emp.reporting_to ?? e.report_to ?? '',
+    noticePeriod: emp.notice_period ?? emp.resign_period ?? emp.notice ?? '',
+    lastDay:     cleanDate(emp.contract_end || emp.last_day || e.last_day),
+    resignationLetter: (emp.resignation_letter ?? emp.resign_letter ?? basic.resignation_letter)
+      ? assetUrl(emp.resignation_letter ?? emp.resign_letter ?? basic.resignation_letter)
+      : '',
     grade:       emp.grade ?? '',
     arrangement: expandStation(emp.work_station),
     timezone:    '',
@@ -182,6 +233,7 @@ export const toEmployeeDetail = (e = {}) => {
     workDays:    schedule.workDays,
     workStart:   schedule.workStart,
     workEnd:     schedule.workEnd,
+    workingWeek: buildWorkingWeek(wd, expandStation(emp.work_station)),
     // Salary breakdown (only base + total are available; rest unknown → 0).
     base:        num(emp.basic_salary),
     housing:     0,

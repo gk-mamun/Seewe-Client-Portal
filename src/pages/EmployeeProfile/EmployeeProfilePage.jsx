@@ -13,8 +13,8 @@ import LeaveTab      from './tabs/LeaveTab.jsx';
 import AttendanceTab from './tabs/AttendanceTab.jsx';
 import JobsheetTab   from './tabs/JobsheetTab.jsx';
 import ClaimsTab     from './tabs/ClaimsTab.jsx';
-import DevicesTab    from './tabs/DevicesTab.jsx';
 import AppraisalTab  from './tabs/AppraisalTab.jsx';
+import DocumentContractTab from './tabs/DocumentContractTab.jsx';
 
 import './EmployeeProfilePage.css';
 
@@ -25,8 +25,8 @@ const TAB_COMPONENTS = {
   attendance: AttendanceTab,
   jobsheet: JobsheetTab,
   claims: ClaimsTab,
-  devices: DevicesTab,
   appraisal: AppraisalTab,
+  documents: DocumentContractTab,
 };
 
 export default function EmployeeProfilePage() {

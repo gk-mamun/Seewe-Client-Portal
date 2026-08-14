@@ -12,7 +12,7 @@ import { employeeService, EMP_STATUSES } from '../../services/employeeService.js
 import useFilteredList from '../../hooks/useFilteredList.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { ROUTES } from '../../utils/constants.js';
-import { formatHKD } from '../../utils/format.js';
+import { formatMYR } from '../../utils/format.js';
 import './EmployeesPage.css';
 
 const STATUS_TONE = {
@@ -89,9 +89,9 @@ export default function EmployeesPage() {
           ? <Badge tone={/contract/i.test(r.contractPeriod) ? 'blu' : 'grn'}>{r.contractPeriod}</Badge>
           : '—',
     },
-    { key: 'baseSalary', header: 'Base Salary', render: (r) => formatHKD(r.baseSalary) },
-    { key: 'allowance',  header: 'Allowance',   render: (r) => formatHKD(r.allowance) },
-    { key: 'mpf',        header: 'Employer MPF (Est)', render: (r) => formatHKD(r.mpf) },
+    { key: 'baseSalary', header: 'Base Salary', render: (r) => formatMYR(r.baseSalary) },
+    { key: 'allowance',  header: 'Allowance',   render: (r) => formatMYR(r.allowance) },
+    { key: 'mpf',        header: 'Employer MPF (Est)', render: (r) => formatMYR(r.mpf) },
     { key: 'joinDate',   header: 'Join Date',   render: (r) => fmtDate(r.joinDate) || '—' },
     { key: 'probation',  header: 'Probation',   render: (r) => <ProbationCell value={r.probation} /> },
     { key: 'lastDay',    header: 'Last Day',    render: (r) => fmtDate(r.lastDay) || '—' },

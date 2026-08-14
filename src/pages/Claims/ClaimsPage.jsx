@@ -9,7 +9,7 @@ import { claimsService } from '../../services/claimsService.js';
 import { CLAIM_TYPE_ICONS } from '../../data/claims.js';
 import useFilteredList from '../../hooks/useFilteredList.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
-import { formatHKD } from '../../utils/format.js';
+import { formatMYR } from '../../utils/format.js';
 import './ClaimsPage.css';
 
 const STATUS_TONE = { Pending: 'amb', Approved: 'grn', Paid: 'blu', Rejected: 'red' };
@@ -156,8 +156,8 @@ export default function ClaimsPage() {
                 activeTab.note && <div className="hd-note">{activeTab.note}</div>
               ) : (
                 <div className="hd-totals">
-                  <span className="hd-total approved">Approved: {formatHKD(summary.total_approved)}</span>
-                  <span className="hd-total rejected">Rejected: {formatHKD(summary.total_rejected)}</span>
+                  <span className="hd-total approved">Approved: {formatMYR(summary.total_approved)}</span>
+                  <span className="hd-total rejected">Rejected: {formatMYR(summary.total_rejected)}</span>
                 </div>
               )}
             </header>
@@ -186,12 +186,12 @@ export default function ClaimsPage() {
                       {c.name} <span className="c-type">— {CLAIM_TYPE_ICONS[c.type] || '💰'} {c.type}</span>
                     </div>
                     <div className="claim-meta">
-                      {formatHKD(c.amount)} <span className="c-date">· {fmtDate(c.date)}</span>
+                      {formatMYR(c.amount)} <span className="c-date">· {fmtDate(c.date)}</span>
                     </div>
                     {c.desc && <div className="claim-desc">{c.desc}</div>}
                     {c.file && (
                       <a className="claim-file" href={c.file} target="_blank" rel="noopener noreferrer">
-                        📎 {c.fileName || 'Receipt'}
+                        📄 {c.fileName || 'Receipt'}
                       </a>
                     )}
                     <div className="claim-sub">Submitted: {fmtDate(c.submitted)}</div>

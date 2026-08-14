@@ -29,7 +29,7 @@ export default function SalaryStep({ draft, set }) {
       </div>
 
       <div className="ae-note ae-note--amber">
-        📌 Employer MPF is estimated at 5% of basic salary, capped at HKD 1,500/month.
+        📌 Employer MPF is estimated at 5% of basic salary, capped at MYR 1,500/month.
         Final amount confirmed by SeeWe Work.
       </div>
     </>

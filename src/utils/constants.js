@@ -22,12 +22,12 @@ export const ONBOARDING_STEPS = [
 ];
 
 export const EMP_PROFILE_TABS = [
-  { key: 'info',       label: 'Info' },
+  { key: 'info',       label: 'Personal Info' },
   { key: 'salary',     label: 'Salary' },
   { key: 'leave',      label: 'Leave' },
-  { key: 'attendance', label: 'Attendance' },
-  { key: 'jobsheet',   label: 'Jobsheet' },
-  { key: 'claims',     label: 'Claims' },
-  { key: 'devices',    label: 'Devices' },
+  { key: 'attendance', label: 'Attendance Report' },
+  { key: 'jobsheet',   label: 'Daily Jobsheet' },
   { key: 'appraisal',  label: 'Appraisal' },
+  { key: 'claims',     label: 'Claims' },
+  { key: 'documents',  label: 'Document & Contract' },
 ];

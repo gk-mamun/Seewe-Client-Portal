@@ -86,15 +86,20 @@ export default function JobsheetTab({ employee }) {
       ? rows.map((r) => `<tr><td class="task">${r.isClock ? `<strong>${esc(r.name)}</strong>` : esc(r.name)}</td>` +
           `<td>${esc(r.start)}</td><td>${esc(r.end)}</td><td>${esc(r.duration)}</td></tr>`).join('')
       : '<tr><td colspan="4" style="text-align:center;padding:24px;color:#888">No tasks for this date.</td></tr>';
+    const logo = 'https://teamdev.seewework.com/public/assets/images/SeeWe%20Work%20Logo_Full_white-01.svg';
     win.document.write(
       `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Timesheet — ${esc(employee?.name)} — ${esc(label)}</title>` +
       `<style>*{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;box-sizing:border-box;` +
       `-webkit-print-color-adjust:exact;print-color-adjust:exact}` +
-      `body{margin:24px;color:#111}.hd{background:#163d72;color:#fff;padding:16px 20px;display:flex;` +
+      `body{margin:24px;color:#111}.brand-logo{height:34px;width:auto;display:block;margin-bottom:14px}` +
+      `.hd{background:#163d72;color:#fff;padding:16px 20px;display:flex;` +
       `justify-content:space-between;align-items:center;border-radius:8px 8px 0 0}.hd .name{font-size:18px;font-weight:700}` +
-      `.hd .sub{font-size:12px;opacity:.85}table{width:100%;border-collapse:collapse;border:1px solid #e5e5e5;border-top:none}` +
+      `.hd .sub{font-size:12px;opacity:.85}` +
+      `table{width:100%;border-collapse:collapse;border:1px solid #e5e5e5;border-top:none}` +
       `th{background:#eaf1fb;text-align:left;padding:10px 14px;font-size:12px;color:#1F488D}` +
-      `td{padding:10px 14px;font-size:13px;border-top:1px solid #f0f0f0}@media print{body{margin:0}}</style></head><body>` +
+      `td{padding:10px 14px;font-size:13px;border-top:1px solid #f0f0f0}@media print{body{margin:0}}</style></head>` +
+      `<body onload="setTimeout(function(){window.print()},400)">` +
+      `<img class="brand-logo" src="${logo}" alt="SeeWe Work"/>` +
       `<div class="hd"><div><div class="name">${esc(employee?.name)}</div><div class="sub">${esc(employee?.pos)}</div></div>` +
       `<div style="text-align:right"><div class="name">${esc(label)}</div><div class="sub">${esc(weekday)}</div></div></div>` +
       `<table><thead><tr><th>Task / Action</th><th>Start</th><th>End</th><th>Duration</th></tr></thead><tbody>${body}</tbody></table>` +
@@ -102,7 +107,6 @@ export default function JobsheetTab({ employee }) {
     );
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 300);
   };
 
   const cols = [

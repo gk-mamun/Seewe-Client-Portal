@@ -1,7 +1,7 @@
 import Card from '../../../components/Card/Card.jsx';
 
 const SAMPLE_APPRAISALS = [
-  { period: 'Q1 2026 (Jan–Mar)', date: 'Apr 5, 2026', reviewer: 'Carol Ng', overall: 4.2, status: 'Completed', increment: 'HKD +2,000' },
+  { period: 'Q1 2026 (Jan–Mar)', date: 'Apr 5, 2026', reviewer: 'Carol Ng', overall: 4.2, status: 'Completed', increment: 'MYR +2,000' },
   { period: 'Probation Review',  date: 'Aug 1, 2025', reviewer: 'Carol Ng', overall: 3.9, status: 'Completed', increment: '—' },
 ];
 
