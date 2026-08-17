@@ -62,19 +62,12 @@ export default function Sidebar() {
         </NavLink>
       ))}
 
-      <div className="sb-wizard">
-        {isCompanyComplete ? (
-          <>
-            <div className="sb-wizard-title">✓ Setup Complete</div>
-            <div className="sb-wizard-sub">Company profile configured</div>
-          </>
-        ) : (
-          <>
-            <div className="sb-wizard-title">⚠ Complete Your Profile</div>
-            <div className="sb-wizard-sub">Fill required fields to unlock the portal</div>
-          </>
-        )}
-      </div>
+      {!isCompanyComplete && (
+        <div className="sb-wizard">
+          <div className="sb-wizard-title">⚠ Complete Your Profile</div>
+          <div className="sb-wizard-sub">Fill required fields to unlock the portal</div>
+        </div>
+      )}
 
       <div className="sb-footer">
         <button type="button" className="si" onClick={handleLogout}>

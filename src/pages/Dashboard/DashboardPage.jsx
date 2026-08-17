@@ -12,6 +12,7 @@ import StaffEventsCard    from './StaffEventsCard.jsx';
 import AttendanceCard     from './AttendanceCard.jsx';
 
 import { dashboardService } from '../../services/dashboardService.js';
+import { employeeService } from '../../services/employeeService.js';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 
 import './DashboardPage.css';
@@ -31,6 +32,35 @@ const todayLabel = () =>
   new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', weekday: 'long' })
     .replace(/^(\w+) (.+)$/, '$2 ($1)'); // "Monday 1 Jun 2026" → "1 Jun 2026 (Monday)"
 
+// Staff expected to clock in today (excludes ex-employees / not-yet-onboard).
+const CURRENT_STAFF = new Set(['Active', 'Probation Period', 'Notice Period']);
+const norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+/** Show every current staff member; anyone without a clock record today is Absent. */
+function mergeAttendance(attendance = [], employees = []) {
+  if (!employees.length) return attendance;
+  const byId = new Map();
+  const byName = new Map();
+  attendance.forEach((a) => {
+    if (a.id != null) byId.set(String(a.id), a);
+    byName.set(norm(a.name), a);
+  });
+  const used = new Set();
+  const rows = employees
+    .filter((e) => CURRENT_STAFF.has(e.status))
+    .map((e) => {
+      const a = (e.id != null && byId.get(String(e.id))) || byName.get(norm(e.name));
+      if (a) { used.add(a); return a; }
+      return {
+        id: e.id, name: e.name, initials: e.initials, color: e.color, photo: e.photo,
+        ci: '', bo: '', bi: '', co: '', total: '', status: 'Absent',
+      };
+    });
+  // Keep any clock record that didn't match a listed employee.
+  attendance.forEach((a) => { if (!used.has(a)) rows.push(a); });
+  return rows;
+}
+
 export default function DashboardPage() {
   useDocumentTitle('Dashboard');
 
@@ -40,9 +70,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let alive = true;
-    dashboardService
-      .get()
-      .then((d) => { if (alive) setData(d); })
+    Promise.all([dashboardService.get(), employeeService.list().catch(() => [])])
+      .then(([d, employees]) => {
+        if (alive) setData({ ...d, attendance: mergeAttendance(d.attendance, employees) });
+      })
       .catch((err) => { if (alive) setError(err?.message || 'Failed to load the dashboard.'); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };

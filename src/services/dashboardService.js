@@ -101,6 +101,7 @@ export const dashboardService = {
 
       // Today's clock status.
       attendance: (d.today_attendance ?? []).map((x) => ({
+        id: x.user_id ?? x.id ?? null,
         ...person(x),
         ci:     x.clockin ?? '',
         bo:     x.breakstart ?? '',   // Break Out

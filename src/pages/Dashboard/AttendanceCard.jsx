@@ -3,7 +3,7 @@ import Avatar from '../../components/Avatar/Avatar.jsx';
 import Badge from '../../components/Badge/Badge.jsx';
 import './attendance.css';
 
-const STATUS_TONE = { 'Clocked Out': 'grn', Working: 'blu', 'On Leave': 'gry' };
+const STATUS_TONE = { 'Clocked Out': 'grn', Working: 'blu', 'On Leave': 'gry', Absent: 'red' };
 
 function timeOrDash(t) {
   return t ? <span className="att-time">{t}</span> : <span className="att-dash">—</span>;
