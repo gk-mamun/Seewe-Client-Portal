@@ -5,12 +5,16 @@
 export default function InfoGrid({ items }) {
   return (
     <div className="info-grid">
-      {items.map((it) => (
-        <div key={it.label} className="info-item">
-          <div className="lbl">{it.label}</div>
-          <div className="val">{it.value || '—'}</div>
-        </div>
-      ))}
+      {items.map((it, idx) =>
+        it.spacer ? (
+          <div key={`sp-${idx}`} className="info-item" aria-hidden="true" />
+        ) : (
+          <div key={it.label || idx} className="info-item">
+            <div className="lbl">{it.label}</div>
+            <div className="val">{it.value || '—'}</div>
+          </div>
+        )
+      )}
     </div>
   );
 }

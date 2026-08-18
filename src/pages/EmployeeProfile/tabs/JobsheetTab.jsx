@@ -86,12 +86,14 @@ export default function JobsheetTab({ employee }) {
       ? rows.map((r) => `<tr><td class="task">${r.isClock ? `<strong>${esc(r.name)}</strong>` : esc(r.name)}</td>` +
           `<td>${esc(r.start)}</td><td>${esc(r.end)}</td><td>${esc(r.duration)}</td></tr>`).join('')
       : '<tr><td colspan="4" style="text-align:center;padding:24px;color:#888">No tasks for this date.</td></tr>';
-    const logo = 'https://teamdev.seewework.com/public/assets/images/SeeWe%20Work%20Logo_Full_white-01.svg';
+    const logo = `${window.location.origin}/seewe-logo.jpg`;
     win.document.write(
       `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Timesheet — ${esc(employee?.name)} — ${esc(label)}</title>` +
       `<style>*{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;box-sizing:border-box;` +
       `-webkit-print-color-adjust:exact;print-color-adjust:exact}` +
-      `body{margin:24px;color:#111}.brand-logo{height:34px;width:auto;display:block;margin-bottom:14px}` +
+      `body{margin:24px;color:#111}` +
+      `.brand-logo{height:44px;width:auto;display:block;margin-bottom:14px}` +
+      `.ft{margin-top:18px;text-align:center;font-size:11px;color:#888;border-top:1px solid #eee;padding-top:10px}` +
       `.hd{background:#163d72;color:#fff;padding:16px 20px;display:flex;` +
       `justify-content:space-between;align-items:center;border-radius:8px 8px 0 0}.hd .name{font-size:18px;font-weight:700}` +
       `.hd .sub{font-size:12px;opacity:.85}` +
@@ -103,6 +105,7 @@ export default function JobsheetTab({ employee }) {
       `<div class="hd"><div><div class="name">${esc(employee?.name)}</div><div class="sub">${esc(employee?.pos)}</div></div>` +
       `<div style="text-align:right"><div class="name">${esc(label)}</div><div class="sub">${esc(weekday)}</div></div></div>` +
       `<table><thead><tr><th>Task / Action</th><th>Start</th><th>End</th><th>Duration</th></tr></thead><tbody>${body}</tbody></table>` +
+      `<footer class="ft"><a href="https://client.seewework.com" style="color:#1F488D">Client.seewework.com</a> · Powered by <strong style="color:#1F488D">SeeWe</strong></footer>` +
       `</body></html>`
     );
     win.document.close();
