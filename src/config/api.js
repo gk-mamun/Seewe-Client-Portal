@@ -58,4 +58,8 @@ export const API_ENDPOINTS = {
 
   // ─── Dashboard ─────────────────────────────────────────────────
   CLIENT_DASHBOARD: '/client/dashboard',   // GET aggregated dashboard data
+
+  // ─── Visitor form ──────────────────────────────────────────────
+  CLIENT_SAVE_VISITOR_FORM: '/client/save-visitor-form', // POST visitor application
+  CLIENT_VISITOR_FORMS: '/client/visitor-forms',         // GET all visitor forms for this client
 };
