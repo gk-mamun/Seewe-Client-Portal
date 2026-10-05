@@ -11,6 +11,29 @@ import { API_ENDPOINTS } from '../config/api.js';
  * components expect. They read several possible column names with a
  * fallback to '' so unknown/absent fields simply stay empty.
  */
+/**
+ * Fields a company must fill (on the /client/details payload) before the rest
+ * of the portal unlocks. Plus at least one contact.
+ */
+export const PROFILE_REQUIRED = [
+  'company_name',
+  'br_no',             // business registration number
+  'industry',
+  'year_established',
+  'no_of_employees',
+  'company_website',
+  'company_address',
+  'country',
+];
+
+/** True only when every required field is filled AND there's ≥ 1 contact. */
+export const isProfileComplete = (details) => {
+  if (!details) return false;
+  const fieldsOk = PROFILE_REQUIRED.every((f) => String(details[f] ?? '').trim() !== '');
+  const hasContact = Array.isArray(details.contacts) && details.contacts.length > 0;
+  return fieldsOk && hasContact;
+};
+
 export const companyService = {
   /** GET /client/details → the `client` payload (or null). */
   getDetails: async () => {

@@ -11,6 +11,9 @@ const STEPS = [
   { n: 3, title: 'Activate',        sub: 'Sign in to continue' },
 ];
 
+// Matches the "username / email doesn't exist" message from the activate API.
+const NOT_FOUND_RE = /not\s*found|no\s*match|does\s*not\s*exist|doesn'?t\s*exist|no\s*account|invalid\s*(user|account|email|username|identifier)/i;
+
 function strengthOf(pw) {
   let s = 0;
   if (pw.length >= 8) s += 1;
@@ -49,27 +52,36 @@ export default function PasswordSetupPage() {
     setErr('');
     setSubmitting(true);
     try {
-      await authService.activate({
+      const res = await authService.activate({
         identifier: identifier.trim(),
         password: pw,
         passwordConfirmation: pw2,
       });
+      // Some backends signal failure with a 200 + { status:'error' } body
+      // instead of a non-2xx status — treat that as a failure too.
+      if (res && (res.status === 'error' || res.success === false || res.error)) {
+        const m = res.message || res.error || 'Activation failed. Please try again.';
+        if (NOT_FOUND_RE.test(m)) setStep(1); // back to the username step
+        setErr(m);
+        return;
+      }
       // No token is issued on activation — send the user to sign in.
       setStep(3);
       setTimeout(() => navigate(ROUTES.LOGIN), 1500);
     } catch (error) {
-      // "No matching account" (404) belongs to the identifier step.
-      if (error?.status === 404) {
+      const m = error?.message || '';
+      // "No matching account" belongs to the identifier step — warn there.
+      if (error?.status === 404 || NOT_FOUND_RE.test(m)) {
         setStep(1);
-        setErr(error.message || 'No matching account found.');
+        setErr(m || 'No matching account found. Please check your username or email.');
       } else if (error?.status === 409) {
         // Already activated — send them to sign in with the message.
         navigate(ROUTES.LOGIN, {
           replace: true,
-          state: { notice: error.message || 'Your account is already activated. You can log in.' },
+          state: { notice: m || 'Your account is already activated. You can log in.' },
         });
       } else {
-        setErr(error?.message || 'Activation failed. Please try again.');
+        setErr(m || 'Activation failed. Please try again.');
       }
     } finally {
       setSubmitting(false);

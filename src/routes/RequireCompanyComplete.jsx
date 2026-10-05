@@ -9,7 +9,12 @@ import { ROUTES } from '../utils/constants.js';
  * routes until those fields are filled in.
  */
 export default function RequireCompanyComplete({ children }) {
-  const { isCompanyComplete } = useAuth();
+  const { isCompanyComplete, companyChecked } = useAuth();
+  // Wait for the /client/details check before deciding — otherwise a complete
+  // profile would be bounced to /company while the check is still loading.
+  if (!companyChecked) {
+    return <p style={{ padding: 24, color: 'var(--c-text-soft)' }}>Loading…</p>;
+  }
   if (!isCompanyComplete) {
     return <Navigate to={ROUTES.COMPANY} replace />;
   }

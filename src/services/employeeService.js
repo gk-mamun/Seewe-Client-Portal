@@ -291,9 +291,11 @@ export const employeeService = {
       month,
       year,
     });
-    // Find the PDF link no matter which key the backend uses.
+    // Backend returns { status, files: [...] }. Pull the file path from `files`
+    // first; fall back to other known keys / a recursive .pdf scan.
     const path =
       res?.pdf_url ?? res?.pdf ?? res?.url ?? res?.file ?? res?.link ?? res?.report_url ?? res?.data?.pdf_url ??
+      firstFile(res?.files) ??
       findPdfLink(res);
     return path ? assetUrl(path) : '';
   },
@@ -306,6 +308,21 @@ export const employeeService = {
     return Array.isArray(rows) ? rows : [];
   },
 };
+
+/** Pull the first usable file path out of the `files` payload (string | array | objects). */
+function firstFile(files) {
+  if (!files) return undefined;
+  if (typeof files === 'string') return files;
+  if (Array.isArray(files)) {
+    for (const f of files) { const p = firstFile(f); if (p) return p; }
+    return undefined;
+  }
+  if (typeof files === 'object') {
+    const p = files.path ?? files.file ?? files.url ?? files.pdf ?? files.link ?? files.name;
+    return p || firstFile(Object.values(files));
+  }
+  return undefined;
+}
 
 /** Recursively scan a value for the first string that looks like a PDF link. */
 function findPdfLink(v) {

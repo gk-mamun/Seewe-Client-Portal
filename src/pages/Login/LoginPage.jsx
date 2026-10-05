@@ -26,17 +26,10 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      const client = await login({ username: username.trim(), password });
-      const requiredOk = ['company_name', 'company_address', 'country', 'email']
-        .every((f) => String(client?.[f] ?? '').trim() !== '');
-
-      // If profile is incomplete, jump straight to the Company page
-      // (the route guard will also enforce this).
-      const dest = !requiredOk
-        ? ROUTES.COMPANY
-        : (location.state?.from?.pathname || ROUTES.DASHBOARD);
-
-      navigate(dest, { replace: true });
+      await login({ username: username.trim(), password });
+      // Go to the intended route (or dashboard). The RequireCompanyComplete
+      // guard checks /client/details and redirects to /company if incomplete.
+      navigate(location.state?.from?.pathname || ROUTES.DASHBOARD, { replace: true });
     } catch (err) {
       setError(err?.message || 'Sign-in failed. Please try again.');
     } finally {

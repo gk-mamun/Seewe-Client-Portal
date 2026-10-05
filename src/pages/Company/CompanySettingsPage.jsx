@@ -57,7 +57,7 @@ const sectionsFromDetails = (d) => ({
 
 export default function CompanySettingsPage() {
   useDocumentTitle('Company');
-  const { updateClient } = useAuth();
+  const { updateClient, refreshProfile } = useAuth();
   const [tab, setTab] = useState('company');
   const [editing, setEditing] = useState(false);
 
@@ -116,13 +116,15 @@ export default function CompanySettingsPage() {
       await companyService.saveDetails(payload, {
         business_reg_certificate: info?.certFile,
       });
-      // Keep the cached client (sidebar + completeness gate) in sync.
+      // Keep the cached client (name/email shown in the top bar) in sync.
       updateClient({
         company_name:    info?.company?.name ?? '',
         company_address: info?.company?.address ?? '',
         country:         info?.company?.country ?? '',
         email:           info?.contact?.email ?? '',
       });
+      // Re-check profile completeness so the menu unlocks immediately.
+      refreshProfile();
       setSaveOk(true);
       setEditing(false);
     } catch (err) {
@@ -139,10 +141,12 @@ export default function CompanySettingsPage() {
   // rebuild the list from stale data and resurrect a deleted (or drop an added) row.
   const handleContactAdded = (raw) => {
     setDetails((d) => (d ? { ...d, contacts: [...(d.contacts ?? []), raw] } : d));
+    refreshProfile();  // a first contact may complete the profile
     setEditing(false); // committed change — drop back to view mode
   };
   const handleContactDeleted = (id) => {
     setDetails((d) => (d ? { ...d, contacts: (d.contacts ?? []).filter((c) => c.id !== id) } : d));
+    refreshProfile();  // removing the last contact may re-lock the portal
     setEditing(false); // committed change — drop back to view mode
   };
 
